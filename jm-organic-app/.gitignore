@@ -1,30 +1,22 @@
 # Dependencies
-node_modules/
-**/node_modules/
+/node_modules
 /.pnp
 .pnp.js
 
-# Testing & Coverage
+# Testing
 /coverage
-**/coverage
 
-# Production & Build Output
-build/
-**/build/
-dist/
-**/dist/
-out/
+# Production Build Output
+/build
+/dist
 
-# Environment Variables & Secrets (Keep private!)
+# Environment Variables & Secrets (Keep your API keys private!)
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-.env*.local
-*.env
 firebase-service-account.json
-**/firebase-service-account.json
 
 # Logs
 npm-debug.log*
@@ -32,12 +24,10 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
-*.log
 
 # Editor & OS Specific Files
 .vscode/
 .idea/
-.qodo/
 *.suo
 *.ntvs*
 *.njsproj
@@ -45,7 +35,6 @@ lerna-debug.log*
 *.sw?
 .DS_Store
 Thumbs.db
-*.tmp
 
 # Cache directories
 /.eslintcache

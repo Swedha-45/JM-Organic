@@ -1,0 +1,288 @@
+/* src/pages/ShopPage.css */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.shop-container {
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+/* Header */
+.header {
+  background: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 0 16px;
+}
+
+.header-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+}
+
+.logo h1 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #15803d;
+}
+
+.logo span {
+  font-size: 12px;
+  color: #6b7280;
+  margin-left: 4px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+}
+
+.nav-links a {
+  color: #374151;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav-links a:hover {
+  color: #15803d;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logout-btn {
+  background: #dc2626;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #b91c1c;
+}
+
+/* Hero */
+.hero {
+  background: linear-gradient(to right, #f0fdf4, #dcfce7);
+  padding: 32px 0;
+}
+
+.hero-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hero h2 {
+  font-size: 30px;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.hero p {
+  font-size: 14px;
+  color: #4b5563;
+  margin-top: 4px;
+}
+
+.hero-badges {
+  display: flex;
+  gap: 8px;
+}
+
+.badge-pure {
+  background: #15803d;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 14px;
+}
+
+.badge-organi {
+  background: #f97316;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 14px;
+}
+
+/* Products */
+.products {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+
+@media (min-width: 768px) {
+  .products {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.product-card {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.product-card:hover {
+  box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+}
+
+.product-image-container {
+  position: relative;
+}
+
+.product-image {
+  width: 100%;
+  height: 256px;
+  object-fit: cover;
+}
+
+.badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: #ef4444;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.badge-pure-product {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #15803d;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.product-info {
+  padding: 24px;
+}
+
+.product-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.product-price {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.price-current {
+  font-size: 24px;
+  font-weight: bold;
+  color: #15803d;
+}
+
+.price-original {
+  font-size: 18px;
+  color: #9ca3af;
+  text-decoration: line-through;
+}
+
+.variants {
+  margin-bottom: 16px;
+}
+
+.variant-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.variant-size {
+  font-weight: 500;
+  color: #374151;
+}
+
+.variant-tag {
+  font-size: 12px;
+  background: #f3f4f6;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #4b5563;
+}
+
+.product-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.star {
+  color: #fbbf24;
+  font-size: 20px;
+}
+
+.rating-number {
+  font-weight: 600;
+}
+
+.review-count {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.add-to-cart {
+  background: #15803d;
+  color: white;
+  padding: 8px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.add-to-cart:hover {
+  background: #166534;
+}
+
+/* Utility */
+.text-center {
+  text-align: center;
+}
