@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+**/node_modules/
+/.pnp
+.pnp.js
+
+# Testing & Coverage
+/coverage
+**/coverage
+
+# Production & Build Output
+build/
+**/build/
+dist/
+**/dist/
+out/
+
+# Environment Variables & Secrets (Keep private!)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+*.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+*.log
+
+# Editor & OS Specific Files
+.vscode/
+.idea/
+.qodo/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Cache directories
+/.eslintcache
+/.cache
+firebase-service-account.json
