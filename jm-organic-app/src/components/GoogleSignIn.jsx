@@ -1,109 +1,75 @@
-import React, { useEffect, useRef } from 'react';
-import { googleClientId, auth } from '../firebase/firebase';
-import { GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import React, { useState } from 'react';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { auth } from '../firebase/firebase';
 
 const GoogleSignIn = ({ onSuccess, onError, text = "signin_with", disabled = false }) => {
-  const buttonRef = useRef(null);
+  const [isSigningIn, setIsSigningIn] = useState(false);
 
-  // Store callbacks in refs to avoid useEffect dependency churn
-  const onSuccessRef = useRef(onSuccess);
-  const onErrorRef = useRef(onError);
+  const handleGoogleSignIn = async () => {
+    if (disabled || isSigningIn) return;
+    setIsSigningIn(true);
 
-  useEffect(() => {
-    onSuccessRef.current = onSuccess;
-    onErrorRef.current = onError;
-  });
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      
+      const result = await signInWithPopup(auth, provider);
+      const firebaseIdToken = await result.user.getIdToken();
 
-  useEffect(() => {
-    let isMounted = true;
-
-    const handleCredentialResponse = async (response) => {
-      if (response.credential) {
-        try {
-          const credential = GoogleAuthProvider.credential(response.credential);
-          const userCredential = await signInWithCredential(auth, credential);
-          const firebaseIdToken = await userCredential.user.getIdToken();
-
-          if (onSuccessRef.current) {
-            onSuccessRef.current({
-              token: firebaseIdToken,
-              user: userCredential.user,
-            });
-          }
-        } catch (error) {
-          console.error('Firebase Auth exchange error:', error);
-          if (onErrorRef.current) onErrorRef.current(error);
-        }
-      } else {
-        if (onErrorRef.current) onErrorRef.current(new Error('No credential received'));
-      }
-    };
-
-    const initAndRender = () => {
-      if (!window.google?.accounts?.id || !isMounted) return;
-
-      if (!window._gsiInitialized) {
-        window.google.accounts.id.initialize({
-          client_id: googleClientId,
-          callback: handleCredentialResponse,
-          auto_select: false,
-          cancel_on_tap_outside: true,
-        });
-        window._gsiInitialized = true;
-      }
-
-      // Render button
-      if (buttonRef.current && !disabled) {
-        buttonRef.current.innerHTML = ''; // Clear previous button elements
-        window.google.accounts.id.renderButton(buttonRef.current, {
-          type: 'standard',
-          theme: 'outline',
-          size: 'large',
-          text: text,
-          shape: 'circle',
-          width: 250,
-          logo_alignment: 'left',
+      if (onSuccess) {
+        await onSuccess({
+          token: firebaseIdToken,
+          user: result.user,
         });
       }
-    };
-
-    // Load GSI script if not present
-    if (!document.querySelector('script[src="https://accounts.google.com/gsi/client"]')) {
-      const script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.async = true;
-      script.defer = true;
-      script.onload = initAndRender;
-      script.onerror = (err) => onErrorRef.current?.(err);
-      document.body.appendChild(script);
-    } else if (window.google?.accounts?.id) {
-      initAndRender();
-    } else {
-      const checkGoogleInterval = setInterval(() => {
-        if (window.google?.accounts?.id) {
-          clearInterval(checkGoogleInterval);
-          initAndRender();
-        }
-      }, 100);
-      return () => clearInterval(checkGoogleInterval);
+    } catch (error) {
+      console.error('Firebase Google Auth error:', error);
+      if (onError) {
+        onError(error);
+      }
+    } finally {
+      setIsSigningIn(false);
     }
+  };
 
-    return () => {
-      isMounted = false;
-    };
-  }, [disabled, text]); // Clean dependencies
+  const buttonText = text === 'signup_with' ? 'Sign up with Google' : 'Sign in with Google';
 
   return (
-    <div 
-      ref={buttonRef} 
-      style={{ 
-        display: 'flex', 
+    <button
+      type="button"
+      onClick={handleGoogleSignIn}
+      disabled={disabled || isSigningIn}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
         justifyContent: 'center',
-        opacity: disabled ? 0.5 : 1,
-        pointerEvents: disabled ? 'none' : 'auto',
-        minHeight: '40px'
+        gap: '12px',
+        width: '100%',
+        maxWidth: '280px',
+        height: '44px',
+        padding: '0 16px',
+        backgroundColor: '#ffffff',
+        color: '#3c4043',
+        border: '1px solid #dadce0',
+        borderRadius: '22px',
+        fontSize: '14px',
+        fontWeight: '500',
+        fontFamily: "'Roboto', 'Segoe UI', system-ui, sans-serif",
+        cursor: (disabled || isSigningIn) ? 'not-allowed' : 'pointer',
+        opacity: (disabled || isSigningIn) ? 0.6 : 1,
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.08)',
+        transition: 'background-color 0.2s, box-shadow 0.2s, transform 0.1s',
       }}
-    />
+      className="google-sign-in-btn"
+    >
+      <svg width="18" height="18" viewBox="0 0 18 18">
+        <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.259h2.908c1.702-1.567 2.684-3.874 2.684-6.617z"/>
+        <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+        <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+        <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+      </svg>
+      <span>{isSigningIn ? 'Connecting...' : buttonText}</span>
+    </button>
   );
 };
 

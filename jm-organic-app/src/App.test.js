@@ -11,10 +11,6 @@ jest.mock('react-i18next', () => ({
   }),
 }));
 
-jest.mock('@react-oauth/google', () => ({
-  GoogleLogin: () => <div>Google Login</div>,
-}));
-
 test('does not redirect to the shop page for invalid credentials', async () => {
   const user = userEvent.setup();
   const router = createMemoryRouter(

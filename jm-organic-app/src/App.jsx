@@ -1,7 +1,6 @@
 // App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 import './App.css';
 
 // Import auth pages
@@ -38,12 +37,9 @@ import { CartProvider } from './contexts/CartContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import ErrorBoundary from './components/ErrorBoundary';
 
-const GOOGLE_CLIENT_ID = '632810157378-25flsko570pmuu86nrtces6k7k0j8sab.apps.googleusercontent.com';
-
 function App() {
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <LanguageProvider>
+    <LanguageProvider>
         <AuthProvider>
           <CartProvider>
             <Router>
@@ -98,7 +94,6 @@ function App() {
           </CartProvider>
         </AuthProvider>
       </LanguageProvider>
-    </GoogleOAuthProvider>
   );
 }
 

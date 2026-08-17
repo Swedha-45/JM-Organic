@@ -45,25 +45,15 @@ export const doSendEmailVerification = async (user) => {
   }
 };
 
-// Google sign in with credential token
-export const doSignInWithGoogle = async (credential) => {
+// Google sign in with Firebase Auth popup
+export const doSignInWithGoogle = async () => {
   try {
-    let result;
-    
-    if (credential) {
-      // If credential is provided (from Google Sign-In button)
-      const credentialObject = GoogleAuthProvider.credential(credential);
-      result = await signInWithCredential(auth, credentialObject);
-    } else {
-      // Fallback to popup (if needed)
-      googleProvider.addScope('profile');
-      googleProvider.addScope('email');
-      googleProvider.setCustomParameters({
-        prompt: 'select_account'
-      });
-      result = await signInWithPopup(auth, googleProvider);
-    }
-    
+    googleProvider.addScope('profile');
+    googleProvider.addScope('email');
+    googleProvider.setCustomParameters({
+      prompt: 'select_account'
+    });
+    const result = await signInWithPopup(auth, googleProvider);
     return result;
   } catch (error) {
     console.error('Google sign in error:', error);

@@ -30,28 +30,31 @@ const NutritionPage = () => {
   // ✅ All hooks must be INSIDE the component
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [showCertModal, setShowCertModal] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
 
-  useEffect(() => {
-    const loadProducts = async () => {
-      setLoading(true);
-      try {
-        // ✅ Use productAPI instead of getAllProductsAsync
-        const response = await productAPI.getAll();
-        const activeList = response.products || [];
-        setProducts(activeList);
-        if (activeList.length > 0) {
-          setSelectedProductId(activeList[0]._id);
-        }
-      } catch (err) {
-        console.error('Error fetching catalog for nutrition:', err);
-      } finally {
-        setLoading(false);
+  const loadProducts = async () => {
+    setLoading(true);
+    setFetchError(false);
+    try {
+      const response = await productAPI.getAll();
+      const activeList = response.products || [];
+      setProducts(activeList);
+      if (activeList.length > 0) {
+        setSelectedProductId(activeList[0]._id);
       }
-    };
+    } catch (err) {
+      console.error('Error fetching catalog for nutrition:', err);
+      setFetchError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadProducts();
   }, []);
 
@@ -76,23 +79,36 @@ const NutritionPage = () => {
     );
   }
 
-  if (products.length === 0 || !selectedData) {
+  if (fetchError || products.length === 0 || !selectedData) {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4 flex items-center justify-center">
         <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center border border-gray-200 shadow-sm space-y-4">
           <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-900 flex items-center justify-center mx-auto text-2xl font-bold">
             🌿
           </div>
-          <h2 className="text-xl font-bold text-gray-900">No Products in Catalog</h2>
+          <h2 className="text-xl font-bold text-gray-900">
+            {fetchError ? 'Unable to load products' : 'No Products in Catalog'}
+          </h2>
           <p className="text-xs text-gray-500">
-            Our catalog is currently empty. Add products via the Admin panel to view their nutrition and lab quality data.
+            {fetchError 
+              ? 'Unable to load products, please try again.' 
+              : 'Our catalog is currently empty. Add products via the Admin panel to view their nutrition and lab quality data.'}
           </p>
-          <Link
-            to="/products"
-            className="inline-block bg-emerald-900 text-white px-6 py-2.5 rounded-full text-xs font-bold shadow-md hover:bg-emerald-950 transition-all"
-          >
-            Browse Store →
-          </Link>
+          {fetchError ? (
+            <button
+              onClick={loadProducts}
+              className="inline-block bg-emerald-900 text-white px-6 py-2.5 rounded-full text-xs font-bold shadow-md hover:bg-emerald-950 transition-all"
+            >
+              Try Again
+            </button>
+          ) : (
+            <Link
+              to="/products"
+              className="inline-block bg-emerald-900 text-white px-6 py-2.5 rounded-full text-xs font-bold shadow-md hover:bg-emerald-950 transition-all"
+            >
+              Browse Store →
+            </Link>
+          )}
         </div>
       </div>
     );

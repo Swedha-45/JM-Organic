@@ -94,14 +94,14 @@ const FeaturedProducts = ({ products = [], loading: initialLoading = false, titl
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-gray-800 mb-4">{title}</h2>
           <p className="text-gray-500">
-            {fetchError ? 'Could not connect to server. Please ensure the backend is running.' : 'No featured products available at the moment.'}
+            {fetchError ? 'Unable to load products, please try again.' : 'No featured products available at the moment.'}
           </p>
           {fetchError && (
             <button
               onClick={loadFeatured}
               className="mt-4 px-5 py-2 bg-green-600 text-white text-xs font-bold rounded-full hover:bg-green-700 transition"
             >
-              Retry Connection
+              Try Again
             </button>
           )}
         </div>
