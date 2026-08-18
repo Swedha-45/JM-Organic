@@ -46,10 +46,18 @@ const createOrder = async (req, res) => {
     // Clear cart
     await Cart.findOneAndDelete({ user: userId });
 
+    const populatedOrder = await Order.findById(order._id).populate('user', 'name email phone');
+
+    // Real-time broadcast
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('order_created', populatedOrder || order);
+    }
+
     res.status(201).json({
       success: true,
       message: 'Order placed successfully',
-      order
+      order: populatedOrder || order
     });
   } catch (error) {
     console.error('Create order error:', error);
@@ -60,10 +68,12 @@ const createOrder = async (req, res) => {
   }
 };
 
-// @desc    Get user orders
+// @desc    Get user orders (or all orders if admin)
 const getOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ user: req.user._id })
+    const query = req.user.role === 'admin' ? {} : { user: req.user._id };
+    const orders = await Order.find(query)
+      .populate('user', 'name email phone')
       .sort({ orderDate: -1 });
 
     res.json({
@@ -117,17 +127,30 @@ const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
     
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found in database'
+      });
+    }
+
     const order = await Order.findByIdAndUpdate(
       req.params.id,
       { status },
       { new: true }
-    );
+    ).populate('user', 'name email phone');
 
     if (!order) {
       return res.status(404).json({
         success: false,
         message: 'Order not found'
       });
+    }
+
+    // Real-time broadcast
+    const io = req.app.get('io');
+    if (io) {
+      io.emit('order_status_updated', order);
     }
 
     res.json({

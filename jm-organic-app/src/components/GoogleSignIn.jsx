@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
-import { auth } from '../firebase/firebase';
+import { signInWithPopup, GoogleAuthProvider, getAuth } from 'firebase/auth';
+import { auth, app } from '../firebase/firebase';
 
 const GoogleSignIn = ({ onSuccess, onError, text = "signin_with", disabled = false }) => {
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -10,10 +10,11 @@ const GoogleSignIn = ({ onSuccess, onError, text = "signin_with", disabled = fal
     setIsSigningIn(true);
 
     try {
+      const activeAuth = auth || getAuth(app);
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: 'select_account' });
       
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(activeAuth, provider);
       const firebaseIdToken = await result.user.getIdToken();
 
       if (onSuccess) {

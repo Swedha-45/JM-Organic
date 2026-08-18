@@ -13,11 +13,15 @@ const Hero = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
+    const params = new URLSearchParams();
     if (searchQuery.trim()) {
-      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
-    } else {
-      navigate('/products');
+      params.set('search', searchQuery.trim());
     }
+    if (selectedCategory && selectedCategory !== 'All Products') {
+      params.set('category', selectedCategory);
+    }
+    const queryString = params.toString();
+    navigate(`/products${queryString ? `?${queryString}` : ''}`);
   };
 
   const handleTagClick = (tagName) => {

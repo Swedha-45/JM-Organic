@@ -35,12 +35,14 @@ const ProductDetailPage = () => {
   useEffect(() => {
     const loadProductDetails = async () => {
       setLoading(true);
-      const found = await getProductByIdAsync(id);
+      const [found, all] = await Promise.all([
+        getProductByIdAsync(id),
+        getAllProductsAsync()
+      ]);
       if (found) {
         setProduct(found);
         setSelectedImage(found.image);
-        const all = await getAllProductsAsync();
-        const related = all.filter((p) => p.id !== id).slice(0, 3);
+        const related = (all || []).filter((p) => (p.id || p._id) !== id).slice(0, 3);
         setRelatedProducts(related);
       } else {
         setProduct(null);
@@ -161,7 +163,11 @@ const ProductDetailPage = () => {
                         selectedImage === img ? 'border-emerald-900 scale-105 shadow-sm' : 'border-transparent opacity-70 hover:opacity-100'
                       }`}
                     >
-                      <img src={img} alt={`Gallery view ${idx+1}`} className="w-full h-full object-cover" />
+                      <img
+                        src={img}
+                        alt={`Gallery view ${idx+1}`}
+                        className="w-full h-full object-cover"
+                      />
                     </button>
                   ))}
                 </div>
@@ -386,10 +392,11 @@ const ProductDetailPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {relatedProducts.map((rel) => {
                 const relDisplayName = isTamil ? (rel.nameTa || rel.name) : rel.name;
+                const relId = rel.id || rel._id;
                 return (
                   <Link
-                    key={rel.id}
-                    to={`/product/${rel.id}`}
+                    key={relId}
+                    to={`/product/${relId}`}
                     className="bg-white p-4 rounded-3xl border border-brand-border/80 shadow-md hover:scale-[1.02] transition-transform flex items-center gap-4"
                   >
                     <img

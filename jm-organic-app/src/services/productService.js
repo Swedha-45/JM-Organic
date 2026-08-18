@@ -1,14 +1,38 @@
 // src/services/productService.js
 import { productAPI } from './api';
 
+// In-memory cache for products
+let cachedProducts = null;
+let lastCacheTime = 0;
+const CACHE_TTL_MS = 60000; // 60 seconds
+
+export const clearProductsCache = () => {
+  cachedProducts = null;
+  lastCacheTime = 0;
+};
+
 // ✅ Get all products
 export const getProducts = async (params = {}) => {
+  const isDefaultQuery = Object.keys(params).length === 0 || (!params.search && !params.category && !params.featured);
+  const now = Date.now();
+
+  if (isDefaultQuery && cachedProducts && (now - lastCacheTime < CACHE_TTL_MS)) {
+    return cachedProducts;
+  }
+
   try {
     const response = await productAPI.getAll(params);
-    return response.products || [];
+    const productsList = response.products || [];
+    
+    if (isDefaultQuery) {
+      cachedProducts = productsList;
+      lastCacheTime = now;
+    }
+
+    return productsList;
   } catch (error) {
     console.error('Error fetching products:', error);
-    return [];
+    return cachedProducts || [];
   }
 };
 
@@ -74,6 +98,7 @@ export const getActiveProducts = async () => {
 // ✅ Add product (Admin)
 export const addProduct = async (productData) => {
   try {
+    clearProductsCache();
     const response = await productAPI.create(productData);
     return response.product || null;
   } catch (error) {
@@ -85,6 +110,7 @@ export const addProduct = async (productData) => {
 // ✅ Update product (Admin)
 export const updateProduct = async (id, productData) => {
   try {
+    clearProductsCache();
     const response = await productAPI.update(id, productData);
     return response.product || null;
   } catch (error) {
@@ -96,6 +122,7 @@ export const updateProduct = async (id, productData) => {
 // ✅ Delete product (Admin)
 export const deleteProduct = async (id) => {
   try {
+    clearProductsCache();
     await productAPI.delete(id);
     return true;
   } catch (error) {

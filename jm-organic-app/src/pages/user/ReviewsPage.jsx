@@ -29,7 +29,7 @@ const INITIAL_REVIEWS = [
     commentTa: 'பாட்டில் திறக்கும் போது வாசனை நம்பமுடியாதது - என் பாட்டி செய்தது போல தூய தேங்காய் வாசனை. சமையல் மற்றும் என் முடி பராமரிப்பு வழக்கத்திற்கு ஏற்றது. கோயம்புத்தூருக்கு விரைவான டெலிவரி.',
     verified: true,
     likes: 42,
-    image: 'https://images.unsplash.com/photo-1611171711912-3c9d1ce8d0f5?w=600&q=80'
+    image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=600&auto=format&fit=crop&q=80'
   },
   {
     id: 'rev-2',

@@ -1,9 +1,9 @@
 // src/pages/ProductsPage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { productAPI } from '../../services/api';
+import { getProducts } from '../../services/productService';
 import ProductCard from '../../components/ProductCard';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 
 const ProductsPage = () => {
   const navigate = useNavigate();
@@ -16,32 +16,23 @@ const ProductsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  const categories = [
-    { id: 'all', label: 'All Products' },
-    { id: 'Oils', label: 'Oils' },
-    { id: 'Fresh Coconuts', label: 'Fresh Coconuts' },
-    { id: 'Bulk Orders', label: 'Bulk Orders' }
-  ];
-
-  // ✅ Load products from backend
+  // ✅ Load products & parse URL params
   useEffect(() => {
     const loadProducts = async () => {
       setLoading(true);
       setError(null);
       
       try {
-        // Get search param from URL
         const params = new URLSearchParams(location.search);
         const search = params.get('search') || '';
+        const category = params.get('category') || 'all';
         
-        if (search) {
-          setSearchQuery(search);
-        }
+        setSearchQuery(search);
+        setSelectedCategory(category);
         
-        // ✅ Fetch from backend
-        const response = await productAPI.getAll({ search });
-        setProducts(response.products || []);
-        setFilteredProducts(response.products || []);
+        // Fetch product catalog
+        const list = await getProducts();
+        setProducts(list);
       } catch (err) {
         setError(err.message || 'Failed to load products');
         console.error('Error loading products:', err);
@@ -53,11 +44,23 @@ const ProductsPage = () => {
     loadProducts();
   }, [location.search]);
 
-  // ✅ Filter products locally
+  // ✅ Dynamically build categories list from products
+  const categories = useMemo(() => {
+    const defaultCats = ['Oils', 'Fresh Coconuts', 'Fruits', 'Grains', 'Sweeteners', 'Bulk Orders'];
+    const dbCats = products.map(p => p.category).filter(Boolean);
+    const uniqueCats = Array.from(new Set([...defaultCats, ...dbCats]));
+    
+    return [
+      { id: 'all', label: 'All Products' },
+      ...uniqueCats.map(c => ({ id: c, label: c }))
+    ];
+  }, [products]);
+
+  // ✅ Filter products locally by search query AND selected category
   useEffect(() => {
     let result = [...products];
     
-    if (selectedCategory !== 'all') {
+    if (selectedCategory && selectedCategory !== 'all') {
       result = result.filter(product => 
         product.category?.toLowerCase() === selectedCategory.toLowerCase()
       );
@@ -78,23 +81,26 @@ const ProductsPage = () => {
   const handleSearch = (e) => {
     const value = e.target.value || '';
     setSearchQuery(value);
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(location.search);
     if (value.trim()) {
       params.set('search', value.trim());
+    } else {
+      params.delete('search');
     }
-    navigate(`/products${params.toString() ? `?${params.toString()}` : ''}`);
+    const queryString = params.toString();
+    navigate(`/products${queryString ? `?${queryString}` : ''}`, { replace: true });
   };
 
   const handleCategoryClick = (categoryId) => {
     setSelectedCategory(categoryId);
+    const params = new URLSearchParams(location.search);
     if (categoryId !== 'all') {
-      const category = categories.find(c => c.id === categoryId);
-      if (category) {
-        navigate(`/products?search=${encodeURIComponent(category.label)}`);
-      }
+      params.set('category', categoryId);
     } else {
-      navigate('/products');
+      params.delete('category');
     }
+    const queryString = params.toString();
+    navigate(`/products${queryString ? `?${queryString}` : ''}`);
   };
 
   const clearFilters = () => {
@@ -190,7 +196,7 @@ const ProductsPage = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProducts.map((product) => (
-            <ProductCard key={product._id} product={product} />
+            <ProductCard key={product.id || product._id} product={product} />
           ))}
         </div>
       )}

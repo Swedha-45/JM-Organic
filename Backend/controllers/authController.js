@@ -5,7 +5,8 @@ const { generateToken } = require('../middleware/auth');
 // @desc    Register user
 const registerUser = async (req, res) => {
   try {
-    const { name, email, password, phone, address } = req.body;
+    const { email, password, phone, address, firstName, lastName } = req.body;
+    const name = (req.body.name || `${firstName || ''} ${lastName || ''}`).trim();
 
     if (!name || !email || !password) {
       return res.status(400).json({

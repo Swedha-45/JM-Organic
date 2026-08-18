@@ -126,23 +126,58 @@ const BulkOrderPage = () => {
   const handleChange = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Save to localStorage for demo
     const requests = JSON.parse(localStorage.getItem('jm_bulk_requests') || '[]');
-    const selectedProduct = products.find(p => p._id === form.productId);
-    localStorage.setItem(
-      'jm_bulk_requests',
-      JSON.stringify([
-        {
-          ...form,
-          productName: selectedProduct?.name || 'Not specified',
-          id: `bq${Date.now()}`,
-          createdAt: new Date().toISOString(),
+    const selectedProduct = products.find(p => p._id === form.productId || p.id === form.productId);
+    
+    const bulkOrderEntry = {
+      id: `BQ-${Math.floor(100000 + Math.random() * 900000)}`,
+      businessName: form.businessName,
+      contactName: form.contactName,
+      customer: form.contactName,
+      email: form.email,
+      phone: form.phone,
+      city: form.city,
+      productId: form.productId,
+      productName: selectedProduct?.name || 'Bulk Organic Produce',
+      quantity: Number(form.quantity || 10),
+      message: form.message,
+      isBulk: true,
+      type: 'bulk',
+      status: 'pending',
+      total: Number(form.quantity || 10) * (selectedProduct?.price || 180),
+      orderDate: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+    };
+
+    const updatedRequests = [bulkOrderEntry, ...requests];
+    localStorage.setItem('jm_bulk_requests', JSON.stringify(updatedRequests));
+
+    // Emit event for real-time dashboard listeners
+    window.dispatchEvent(new Event('bulkOrderSubmitted'));
+
+    try {
+      const { orderAPI } = await import('../../services/api');
+      await orderAPI.create({
+        items: [{
+          name: `[BULK ORDER] ${bulkOrderEntry.productName} (${form.businessName})`,
+          quantity: Number(form.quantity || 10),
+          price: selectedProduct?.price || 180,
+          product: selectedProduct?._id
+        }],
+        shippingAddress: {
+          name: `${form.contactName} (${form.businessName})`,
+          phone: form.phone,
+          street: `${form.city} - Notes: ${form.message || 'No extra notes'}`
         },
-        ...requests,
-      ])
-    );
+        paymentMethod: 'cod',
+        notes: `BULK QUOTE: ${form.businessName} - ${form.city} - Qty: ${form.quantity}L`
+      });
+    } catch (apiErr) {
+      console.warn('API bulk order sync skipped (using local backup):', apiErr);
+    }
+
     setSubmitted(true);
   };
 

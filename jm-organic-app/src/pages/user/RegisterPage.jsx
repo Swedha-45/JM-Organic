@@ -58,6 +58,7 @@ function RegisterPage() {
     setLoading(true);
     try {
       await register({
+        name: `${firstName} ${lastName}`.trim(),
         firstName,
         lastName,
         email,

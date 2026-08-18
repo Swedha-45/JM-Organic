@@ -21,12 +21,11 @@ const getProducts = async (req, res) => {
       });
     }
 
-    const rawProducts = await query;
-    const products = rawProducts.map(p => {
-      const obj = p.toObject();
-      obj.id = obj._id.toString();
-      return obj;
-    });
+    const rawProducts = await query.lean();
+    const products = rawProducts.map(p => ({
+      ...p,
+      id: p._id ? p._id.toString() : p.id
+    }));
     
     res.json({
       success: true,
@@ -45,7 +44,7 @@ const getProducts = async (req, res) => {
 // @desc    Get single product
 const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findById(req.params.id).lean();
     
     if (!product) {
       return res.status(404).json({
@@ -54,12 +53,11 @@ const getProductById = async (req, res) => {
       });
     }
 
-    const obj = product.toObject();
-    obj.id = obj._id.toString();
+    product.id = product._id ? product._id.toString() : product.id;
     
     res.json({
       success: true,
-      product: obj
+      product
     });
   } catch (error) {
     console.error('Get product error:', error);
