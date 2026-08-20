@@ -10,13 +10,13 @@ const resources = {
       heroSubtitle: 'Coconut oil, fresh coconuts, and groundnuts sourced directly from Tamil Nadu farms. Transparent market pricing — no middleman markup.',
       search: 'Search',
       searchPlaceholder: 'Search for organic products...',
-      
+
       // Stats
       organicProducts: 'ORGANIC PRODUCTS',
       certifiedPure: 'CERTIFIED PURE',
       avgCoconutOil: 'AVG. COCONUT OIL /L',
       happyFamilies: 'HAPPY FAMILIES',
-      
+
       // Categories
       allProducts: 'All Products',
       oils: 'Oils',
@@ -25,7 +25,7 @@ const resources = {
       coconutOil1L: 'Coconut Oil 1L',
       bulk25L: 'Bulk 25L',
       coldPressed: 'Cold Pressed',
-      
+
       // Navigation
       shop: 'Shop',
       nutrition: 'Nutrition & Lab',
@@ -46,7 +46,7 @@ const resources = {
       home: 'Home',
       products: 'Products',
       lowStock: 'Low Stock',
-      
+
       // Home Page
       pureHarvest: 'Pure harvest. Direct to home.',
       heroSub: 'Fresh, traceable organic produce from Tamil Nadu farms',
@@ -61,7 +61,7 @@ const resources = {
       farmDirectHome: 'Directly from Tamil Nadu farms to your home',
       whyChooseSubtitle: 'Discover why thousands trust JM Organic for their daily nutrition',
       shopNow: 'Shop Now',
-      
+
       // Why Choose Us
       directFromTamilNaduFarms: 'Direct from Tamil Nadu Farms',
       farmSourceDescription: 'Every product comes from within 200km of our facility. Scan the QR code on your order to track your product to certified partner farms in Coimbatore & Pollachi.',
@@ -73,7 +73,7 @@ const resources = {
       organicFarms: '24+ Organic Farms',
       packaging: 'Packaging',
       recyclableGlassTin: '100% Recyclable Glass & Tin',
-      
+
       // Bulk Orders
       bulkOrdersTagline: 'For Restaurants, Bakeries & Retailers',
       wholesaleHeading: 'Wholesale & Bulk Supply: 5L to 100L',
@@ -81,7 +81,7 @@ const resources = {
       volumeSavings: 'Volume Savings',
       batchCapacity: 'Batch Capacity',
       getWholesaleQuote: 'Get Wholesale Quote',
-      
+
       // Checkout & Cart
       quickCheckout: 'Proceed to Checkout',
       totalAmount: 'Total Amount',
@@ -102,7 +102,7 @@ const resources = {
       pincode: 'Pincode',
       cashOnDelivery: 'Cash on Delivery',
       onlinePayment: 'Online Payment',
-      
+
       // Admin Panel
       adminPortal: 'Admin Dashboard',
       adminPanel: 'Admin Panel',
@@ -140,7 +140,7 @@ const resources = {
       hundredPure: '100% Pure',
       farmExpress: 'Farm Express',
       easyReturns: 'Easy Returns',
-      
+
       // Products Page
       popularity: 'Popularity',
       priceLowHigh: 'Price: Low to High',
@@ -154,7 +154,7 @@ const resources = {
       productType: 'Product Type',
       noPreservatives: 'No Preservatives',
       virgin: 'Virgin',
-      
+
       // Authentication
       signInHeader: 'Sign In to Your Account',
       createAccountHeader: 'Create Your Account',
@@ -167,22 +167,24 @@ const resources = {
       or: 'or',
       dontHaveAccount: "Don't have an account?",
       registerHere: 'Register here →',
+
       // Featured Products
-handpickedOrganic: 'HANDPICKED ORGANIC PURE SELECTION',
-straightFrom: 'Straight from Tamil Nadu cold-press units to your kitchen — pure, unadulterated, and nutrient rich.',
-viewAllProducts: 'View All Products',
-addedToCart: 'Added to Cart!',
-packageUnit: 'Package Unit:',
-bestSeller: 'BEST SELLER',
-pure: 'PURE',
-fresh: 'FRESH',
+      handpickedOrganic: 'HANDPICKED ORGANIC PURE SELECTION',
+      straightFrom: 'Straight from Tamil Nadu cold-press units to your kitchen — pure, unadulterated, and nutrient rich.',
+      viewAllProducts: 'View All Products',
+      addedToCart: 'Added to Cart!',
+      packageUnit: 'Package Unit:',
+      bestSeller: 'BEST SELLER',
+      pure: 'PURE',
+      fresh: 'FRESH',
+
       // Common
       fssaiCertifiedLabel: 'FSSAI Certified',
       hundredColdPressed: '100% Cold-Pressed',
       organicQualityGuarantee: '100% Organic Quality Guarantee',
       directFarmSourcing: 'Direct Farm Sourcing',
       fssaiApprovedLab: 'FSSAI APPROVED LAB ANALYSIS',
-      
+
       // Footer
       footerAbout: 'About Us',
       footerDescription: 'JM Organic brings pure, traceable organic produce directly from Tamil Nadu farms to your home.',
@@ -191,53 +193,54 @@ fresh: 'FRESH',
       footerRights: 'All rights reserved',
       footerPrivacy: 'Privacy Policy',
       footerTerms: 'Terms of Service',
+
       // Nutrition Page
-nutritionTitle: 'Nutritional Analysis & Lab Test Results',
-nutritionSubtitle: 'Explore the complete fatty acid profile, antioxidant levels, MCT breakdown, and certified lab purity results for JM Organic cold-pressed oils.',
-viewCertificate: 'View Official Lab Certificate',
-fssaiApprovedLab: 'FSSAI APPROVED LAB ANALYSIS',
-smokePoint: 'Smoke Point',
-extractionMethod: 'Extraction Method',
-woodPressed: 'Wood-Pressed (28°C)',
-dailyIntake: 'Daily Intake Calculator',
-dailyIntakeDesc: 'Adjust daily dosage to compute your exact dietary intake:',
-dailyConsumption: 'Daily Consumption',
-day: 'day',
-tsp: 'tsp',
-tbsp: 'tbsp',
-cooking: 'Cooking',
-energy: 'Energy',
-totalMCTs: 'Total MCTs',
-fattyAcidComposition: 'Fatty Acid Composition & Nutrients',
-gcmsAnalysis: 'Gas Chromatography (GC-MS) analysis per 100g sample.',
-labPurityReport: 'Certified Lab Purity Report',
-peroxideValue: 'Peroxide Value (PV)',
-freeFattyAcid: 'Free Fatty Acid (FFA)',
-heavyMetals: 'Heavy Metals (Lead, Arsenic, Mercury)',
-solventResidue: 'Solvent Residue & Hexane',
-moistureContent: 'Moisture Content',
-immunityIndex: 'Immunity Index',
-metabolismScore: 'Metabolism Score',
-cardiovascular: 'Cardiovascular',
-fssaiCertifiedLabReport: 'FSSAI CERTIFIED ANALYTICAL LAB REPORT',
-certificateQuality: 'JM Organic Certificate of Quality & Purity',
-issuedBy: 'Issued by NABL Accredited Food Quality Testing Hub • Coimbatore',
-sampleTested: 'Sample Tested',
-batchCode: 'Batch Code',
-chemicalSolventsTest: 'Chemical Solvents Test',
-passed: 'PASSED (0.0% Hexane / Zero Bleach)',
-heavyMetalsToxins: 'Heavy Metals & Toxins',
-labRating: 'Lab Rating',
-gradeA: 'GRADE A+ (100% PURE ORGANIC)',
-qrVerified: 'QR Code Verified • Certificate ID: JM-NABL-2026',
-printCertificate: 'Print Certificate',
-quantity: 'Quantity',
-addedToCart: 'Added to Cart!',
-// Nutrition Page
-ourOils: 'Our Oils',
-inCart: 'In Cart',
-addMore: 'Add More',
-viewCart: 'View Cart',
+      nutritionTitle: 'Nutritional Analysis & Lab Test Results',
+      nutritionSubtitle: 'Explore the complete fatty acid profile, antioxidant levels, MCT breakdown, and certified lab purity results for JM Organic cold-pressed oils.',
+      viewCertificate: 'View Official Lab Certificate',
+      smokePoint: 'Smoke Point',
+      extractionMethod: 'Extraction Method',
+      woodPressed: 'Wood-Pressed (28°C)',
+      dailyIntake: 'Daily Intake Calculator',
+      dailyIntakeDesc: 'Adjust daily dosage to compute your exact dietary intake:',
+      dailyConsumption: 'Daily Consumption',
+      day: 'day',
+      tsp: 'tsp',
+      tbsp: 'tbsp',
+      cooking: 'Cooking',
+      energy: 'Energy',
+      totalMCTs: 'Total MCTs',
+      fattyAcidComposition: 'Fatty Acid Composition & Nutrients',
+      gcmsAnalysis: 'Gas Chromatography (GC-MS) analysis per 100g sample.',
+      labPurityReport: 'Certified Lab Purity Report',
+      peroxideValue: 'Peroxide Value (PV)',
+      freeFattyAcid: 'Free Fatty Acid (FFA)',
+      heavyMetals: 'Heavy Metals (Lead, Arsenic, Mercury)',
+      solventResidue: 'Solvent Residue & Hexane',
+      moistureContent: 'Moisture Content',
+      immunityIndex: 'Immunity Index',
+      metabolismScore: 'Metabolism Score',
+      cardiovascular: 'Cardiovascular',
+      fssaiCertifiedLabReport: 'FSSAI CERTIFIED ANALYTICAL LAB REPORT',
+      certificateQuality: 'JM Organic Certificate of Quality & Purity',
+      issuedBy: 'Issued by NABL Accredited Food Quality Testing Hub • Coimbatore',
+      sampleTested: 'Sample Tested',
+      batchCode: 'Batch Code',
+      chemicalSolventsTest: 'Chemical Solvents Test',
+      passed: 'PASSED (0.0% Hexane / Zero Bleach)',
+      heavyMetalsToxins: 'Heavy Metals & Toxins',
+      labRating: 'Lab Rating',
+      gradeA: 'GRADE A+ (100% PURE ORGANIC)',
+      qrVerified: 'QR Code Verified • Certificate ID: JM-NABL-2026',
+      printCertificate: 'Print Certificate',
+      quantity: 'Quantity',
+
+      // Nutrition Page - Additional
+      ourOils: 'Our Oils',
+      inCart: 'In Cart',
+      addMore: 'Add More',
+      viewCart: 'View Cart',
+
       // Newsletter
       emailPlaceholder: 'Enter your email',
       subscribe: 'Subscribe',
@@ -247,30 +250,33 @@ viewCart: 'View Cart',
       newsletterSuccess: 'Thank you! Coupon code ORGANIC10 has been sent to your email.',
       newsletterClaim: 'Claim 10% Off',
       newsletterDisclaimer: 'No spam ever. Unsubscribe at any time with one click.',
+
+      // Testimonials
       testimonialsTitle: 'Trusted by 12,000+ Families & Chefs Across India',
-testimonialsSubtitle: 'Read what our verified buyers say about our cold-pressed oils and organic farm produce.',
-verified: 'Verified',
-realCustomerReviews: 'Real Customer Reviews',
-// Reviews Page
-reviewsPageTitle: 'Verified Farm Reviews & Ratings',
-reviewsPageSubtitle: 'Read real feedback from over 12,000+ families across South India who trust JM Organic for pure cold-pressed oils.',
-basedOn: 'Based on',
-verifiedOrders: 'verified orders',
-stars: 'stars',
-allReviews: 'All Reviews',
-verified: 'Verified',
-product: 'Product',
-helpful: 'Helpful',
-yourName: 'Your Name',
-namePlaceholder: 'Priya Sundaram',
-selectProduct: 'Select Product',
-starRating: 'Star Rating',
-reviewTitle: 'Review Title',
-titlePlaceholder: 'e.g. Pure, aromatic and fresh!',
-detailedReview: 'Detailed Review',
-commentPlaceholder: 'Tell us about the aroma, taste, and quality...',
-submitReview: 'Submit Review',
-writeReviewSubtitle: 'Share your experience with JM Organic cold-pressed oils.',
+      testimonialsSubtitle: 'Read what our verified buyers say about our cold-pressed oils and organic farm produce.',
+      verified: 'Verified',
+      realCustomerReviews: 'Real Customer Reviews',
+
+      // Reviews Page
+      reviewsPageTitle: 'Verified Farm Reviews & Ratings',
+      reviewsPageSubtitle: 'Read real feedback from over 12,000+ families across South India who trust JM Organic for pure cold-pressed oils.',
+      basedOn: 'Based on',
+      verifiedOrders: 'verified orders',
+      stars: 'stars',
+      allReviews: 'All Reviews',
+      product: 'Product',
+      helpful: 'Helpful',
+      yourName: 'Your Name',
+      namePlaceholder: 'Priya Sundaram',
+      selectProduct: 'Select Product',
+      starRating: 'Star Rating',
+      reviewTitle: 'Review Title',
+      titlePlaceholder: 'e.g. Pure, aromatic and fresh!',
+      detailedReview: 'Detailed Review',
+      commentPlaceholder: 'Tell us about the aroma, taste, and quality...',
+      submitReview: 'Submit Review',
+      writeReviewSubtitle: 'Share your experience with JM Organic cold-pressed oils.',
+
       // Product Detail
       productNotFound: 'Product Not Found',
       productNotFoundDesc: 'The product you\'re looking for might have been moved or removed.',
@@ -293,125 +299,13 @@ writeReviewSubtitle: 'Share your experience with JM Organic cold-pressed oils.',
       heroSubtitle: 'தமிழ்நாடு பண்ணைகளிலிருந்து நேரடியாக பெறப்பட்ட மரச்செக்கு தேங்காய் எண்ணெய், இளநீர் மற்றும் கடலை எண்ணெய். நேர்மையான சந்தை விலை - நடுவர் இல்லை.',
       search: 'தேடுக',
       searchPlaceholder: 'இயற்கை பொருட்களுக்கு தேடுங்கள்...',
-      // Testimonials
-testimonialsTitle: 'இந்தியா முழுவதும் 12,000+ குடும்பங்கள் & சமையல்காரர்களால் நம்பப்படுகிறது',
-testimonialsSubtitle: 'எங்கள் மரச்செக்கு எண்ணெய்கள் மற்றும் இயற்கை பண்ணை பொருட்களைப் பற்றி எங்கள் சரிபார்க்கப்பட்ட வாங்குபவர்கள் என்ன சொல்கிறார்கள் என்பதைப் படியுங்கள்.',
-verified: 'சரிபார்க்கப்பட்டது',
-realCustomerReviews: 'உண்மையான வாடிக்கையாளர் மதிப்பீடுகள்',
+
       // Stats
       organicProducts: 'இயற்கை பொருட்கள்',
       certifiedPure: '100% சான்றளிக்கப்பட்டது',
       avgCoconutOil: 'சராசரி தேங்காய் எண்ணெய் /L',
       happyFamilies: 'மகிழ்ச்சியான குடும்பங்கள்',
-      // Reviews Page
-reviewsPageTitle: 'சரிபார்க்கப்பட்ட பண்ணை மதிப்பீடுகள் & மதிப்புரைகள்',
-reviewsPageSubtitle: 'JM Organic மரச்செக்கு எண்ணெய்களை நம்பும் தென்னிந்தியா முழுவதும் 12,000+ குடும்பங்களின் உண்மையான கருத்துகளைப் படியுங்கள்.',
-basedOn: 'அடிப்படையில்',
-verifiedOrders: 'சரிபார்க்கப்பட்ட ஆர்டர்கள்',
-stars: 'நட்சத்திரங்கள்',
-allReviews: 'அனைத்து மதிப்பீடுகளும்',
-verified: 'சரிபார்க்கப்பட்டது',
-product: 'பொருள்',
-helpful: 'பயனுள்ளதாக',
-yourName: 'உங்கள் பெயர்',
-namePlaceholder: 'பிரியா சுந்தரம்',
-selectProduct: 'பொருளைத் தேர்ந்தெடுக்கவும்',
-starRating: 'நட்சத்திர மதிப்பீடு',
-reviewTitle: 'மதிப்பீட்டு தலைப்பு',
-titlePlaceholder: 'எ.கா. தூய, நறுமணமான மற்றும் புதிய!',
-detailedReview: 'விரிவான மதிப்பீடு',
-commentPlaceholder: 'வாசனை, சுவை மற்றும் தரம் பற்றி எங்களுக்கு சொல்லுங்கள்...',
-submitReview: 'மதிப்பீட்டை சமர்ப்பிக்கவும்',
-writeReviewSubtitle: 'JM Organic மரச்செக்கு எண்ணெய்களுடன் உங்கள் அனுபவத்தைப் பகிரவும்.',
-      // Featured Products
-handpickedOrganic: 'கைமுறையாக தேர்ந்தெடுக்கப்பட்ட இயற்கை தூய பொருட்கள்',
-straightFrom: 'தமிழ்நாடு மரச்செக்கு அலகுகளிலிருந்து உங்கள் சமையலறைக்கு நேரடியாக — தூய, கலப்படமில்லாத, மற்றும் ஊட்டச்சத்து நிறைந்தது.',
-viewAllProducts: 'அனைத்து பொருட்களையும் காண்க',
-addedToCart: 'கூடையில் சேர்க்கப்பட்டது!',
-packageUnit: 'தொகுப்பு அலகு:',
-bestSeller: 'சிறந்த விற்பனை',
-pure: 'தூய்மையானது',
-fresh: 'புதியவை',
-// Nutrition Page
-ourOils: 'எங்கள் எண்ணெய்கள்',
-inCart: 'கூடையில் உள்ளது',
-addMore: 'மேலும் சேர்க்க',
-viewCart: 'கூடையை காண்க',
-nutritionTitle: 'ஊட்டச்சத்து பகுப்பாய்வு & ஆய்வக சோதனை முடிவுகள்',
-nutritionSubtitle: 'JM Organic மரச்செக்கு எண்ணெய்களுக்கான முழு கொழுப்பு அமில சுயவிவரம், ஆன்டிஆக்ஸிடன்ட் அளவுகள், MCT பிரிப்பு மற்றும் சான்றளிக்கப்பட்ட ஆய்வக தூய்மை முடிவுகளை ஆராயுங்கள்.',
-viewCertificate: 'அதிகாரப்பூர்வ ஆய்வக சான்றிதழைக் காண்க',
-fssaiApprovedLab: 'FSSAI அனுமதிக்கப்பட்ட ஆய்வக பகுப்பாய்வு',
-smokePoint: 'புகை புள்ளி',
-extractionMethod: 'பிரித்தெடுத்தல் முறை',
-woodPressed: 'மரச்செக்கு (28°C)',
-fattyAcidComposition: 'கொழுப்பு அமில கலவை & ஊட்டச்சத்துக்கள்',
-gcmsAnalysis: 'ஒவ்வொரு 100g மாதிரிக்கும் கேஸ் குரோமடோகிராபி (GC-MS) பகுப்பாய்வு.',
-labPurityReport: 'சான்றளிக்கப்பட்ட ஆய்வக தூய்மை அறிக்கை',
-peroxideValue: 'பெராக்சைடு மதிப்பு (PV)',
-freeFattyAcid: 'இலவச கொழுப்பு அமிலம் (FFA)',
-heavyMetals: 'கன உலோகங்கள் (ஈயம், ஆர்சனிக், பாதரசம்)',
-solventResidue: 'கரைப்பான் எச்சம் & ஹெக்சேன்',
-moistureContent: 'ஈரப்பதம் உள்ளடக்கம்',
-immunityIndex: 'நோய் எதிர்ப்பு குறியீடு',
-metabolismScore: 'வளர்சிதை மாற்ற மதிப்பெண்',
-cardiovascular: 'இதயம்',
-fssaiCertifiedLabReport: 'FSSAI சான்றளிக்கப்பட்ட பகுப்பாய்வு ஆய்வக அறிக்கை',
-certificateQuality: 'JM Organic தரம் & தூய்மை சான்றிதழ்',
-issuedBy: 'NABL அங்கீகாரம் பெற்ற உணவு தர சோதனை மையம் • கோயம்புத்தூர்',
-sampleTested: 'சோதிக்கப்பட்ட மாதிரி',
-batchCode: 'தொகுதி குறியீடு',
-chemicalSolventsTest: 'இரசாயன கரைப்பான்கள் சோதனை',
-passed: 'தேர்ச்சி (0.0% ஹெக்சேன் / பூஜ்ஜிய ப்ளீச்)',
-heavyMetalsToxins: 'கன உலோகங்கள் & நச்சுகள்',
-labRating: 'ஆய்வக மதிப்பீடு',
-gradeA: 'தரம் A+ (100% தூய இயற்கை)',
-qrVerified: 'QR குறியீடு சரிபார்க்கப்பட்டது • சான்றிதழ் ID: JM-NABL-2026',
-printCertificate: 'சான்றிதழை அச்சிடுக',
-quantity: 'அளவு',
-addedToCart: 'கூடையில் சேர்க்கப்பட்டது!',
-inStock: 'இருப்பில் உள்ளது',
-// Nutrition Page
-nutritionTitle: 'ஊட்டச்சத்து பகுப்பாய்வு & ஆய்வக சோதனை முடிவுகள்',
-nutritionSubtitle: 'JM Organic மரச்செக்கு எண்ணெய்களுக்கான முழு கொழுப்பு அமில சுயவிவரம், ஆன்டிஆக்ஸிடன்ட் அளவுகள், MCT பிரிப்பு மற்றும் சான்றளிக்கப்பட்ட ஆய்வக தூய்மை முடிவுகளை ஆராயுங்கள்.',
-viewCertificate: 'அதிகாரப்பூர்வ ஆய்வக சான்றிதழைக் காண்க',
-fssaiApprovedLab: 'FSSAI அனுமதிக்கப்பட்ட ஆய்வக பகுப்பாய்வு',
-smokePoint: 'புகை புள்ளி',
-extractionMethod: 'பிரித்தெடுத்தல் முறை',
-woodPressed: 'மரச்செக்கு (28°C)',
-dailyIntake: 'தினசரி உட்கொள்ளல் கால்குலேட்டர்',
-dailyIntakeDesc: 'உங்கள் சரியான உணவு உட்கொள்ளலை கணக்கிட தினசரி அளவை சரிசெய்யவும்:',
-dailyConsumption: 'தினசரி நுகர்வு',
-day: 'நாள்',
-tsp: 'தேக்கரண்டி',
-tbsp: 'தேக்கரண்டி',
-cooking: 'சமையல்',
-energy: 'ஆற்றல்',
-totalMCTs: 'மொத்த MCT கள்',
-fattyAcidComposition: 'கொழுப்பு அமில கலவை & ஊட்டச்சத்துக்கள்',
-gcmsAnalysis: 'ஒவ்வொரு 100g மாதிரிக்கும் கேஸ் குரோமடோகிராபி (GC-MS) பகுப்பாய்வு.',
-labPurityReport: 'சான்றளிக்கப்பட்ட ஆய்வக தூய்மை அறிக்கை',
-peroxideValue: 'பெராக்சைடு மதிப்பு (PV)',
-freeFattyAcid: 'இலவச கொழுப்பு அமிலம் (FFA)',
-heavyMetals: 'கன உலோகங்கள் (ஈயம், ஆர்சனிக், பாதரசம்)',
-solventResidue: 'கரைப்பான் எச்சம் & ஹெக்சேன்',
-moistureContent: 'ஈரப்பதம் உள்ளடக்கம்',
-immunityIndex: 'நோய் எதிர்ப்பு குறியீடு',
-metabolismScore: 'வளர்சிதை மாற்ற மதிப்பெண்',
-cardiovascular: 'இதயம்',
-fssaiCertifiedLabReport: 'FSSAI சான்றளிக்கப்பட்ட பகுப்பாய்வு ஆய்வக அறிக்கை',
-certificateQuality: 'JM Organic தரம் & தூய்மை சான்றிதழ்',
-issuedBy: 'NABL அங்கீகாரம் பெற்ற உணவு தர சோதனை மையம் • கோயம்புத்தூர்',
-sampleTested: 'சோதிக்கப்பட்ட மாதிரி',
-batchCode: 'தொகுதி குறியீடு',
-chemicalSolventsTest: 'இரசாயன கரைப்பான்கள் சோதனை',
-passed: 'தேர்ச்சி (0.0% ஹெக்சேன் / பூஜ்ஜிய ப்ளீச்)',
-heavyMetalsToxins: 'கன உலோகங்கள் & நச்சுகள்',
-labRating: 'ஆய்வக மதிப்பீடு',
-gradeA: 'தரம் A+ (100% தூய இயற்கை)',
-qrVerified: 'QR குறியீடு சரிபார்க்கப்பட்டது • சான்றிதழ் ID: JM-NABL-2026',
-printCertificate: 'சான்றிதழை அச்சிடுக',
-quantity: 'அளவு',
-addedToCart: 'கூடையில் சேர்க்கப்பட்டது!',
+
       // Categories
       allProducts: 'அனைத்து பொருட்கள்',
       oils: 'எண்ணெய்கள்',
@@ -420,14 +314,7 @@ addedToCart: 'கூடையில் சேர்க்கப்பட்ட�
       coconutOil1L: 'தேங்காய் எண்ணெய் 1L',
       bulk25L: 'பெரிய 25L',
       coldPressed: 'மரச்செக்கு',
-      // Newsletter
-newsletterBadge: '25,000+ இயற்கை உணவு ஆர்வலர்களுடன் இணையுங்கள்',
-newsletterTitle: 'உங்கள் முதல் மரச்செக்கு ஆர்டரில் 10% தள்ளுபடி பெறுங்கள்',
-newsletterSubtitle: 'எங்கள் வாராந்திர பண்ணை அறுவடை செய்திமடலுக்கு குழுசேரவும், பிரத்யேக தள்ளுபடி கூப்பன்கள், ஆரோக்கியமான எண்ணெய் பயன்பாட்டு உதவிக்குறிப்புகள் மற்றும் புதிய பொருட்கள் அறிவிப்புகளைப் பெறுங்கள்.',
-newsletterSuccess: 'நன்றி! கூப்பன் குறியீடு ORGANIC10 உங்கள் மின்னஞ்சலுக்கு அனுப்பப்பட்டுள்ளது.',
-newsletterClaim: '10% தள்ளுபடி பெறுக',
-newsletterDisclaimer: 'எப்போதும் ஸ்பேம் இல்லை. எந்த நேரத்திலும் ஒரு கிளிக்கில் குழுவிலகலாம்.',
-      
+
       // Navigation
       shop: 'கடை',
       nutrition: 'ஊட்டச்சத்து & பரிசோதனை',
@@ -448,7 +335,7 @@ newsletterDisclaimer: 'எப்போதும் ஸ்பேம் இல்�
       home: 'முகப்பு',
       products: 'பொருட்கள்',
       lowStock: 'குறைந்த இருப்பு',
-      
+
       // Home Page
       pureHarvest: 'தூய அறுவடை. நேரடி விநியோகம்.',
       heroSub: 'தமிழ்நாடு பண்ணைகளில் இருந்து நேரடியாக வரும் இயற்கை பொருட்கள்',
@@ -463,7 +350,7 @@ newsletterDisclaimer: 'எப்போதும் ஸ்பேம் இல்�
       farmDirectHome: 'தமிழ்நாடு பண்ணைகளில் இருந்து நேரடியாக உங்கள் வீட்டிற்கு',
       whyChooseSubtitle: 'JM இயற்கையை ஏன் ஆயிரக்கணக்கானோர் நம்புகிறார்கள் என்பதைக் கண்டறியவும்',
       shopNow: 'இப்போது ஷாப்பிங் செய்க',
-      
+
       // Why Choose Us
       directFromTamilNaduFarms: 'தமிழ்நாடு பண்ணைகளில் இருந்து நேரடி',
       farmSourceDescription: 'ஒவ்வொரு பொருளும் எங்கள் வசதிக்கு 200 கி.மீ க்குள் இருந்து வரும். உங்கள் ஆர்டரில் QR குறியீட்டை ஸ்கேன் செய்து, கோயம்பூர் & பொலாச்சி-யில் சான்றளிக்கப்பட்ட பங்குதாரர் கோவைகளுக்கு உங்கள் பொருளைக் கண்டுபிடிக்க முடியும்.',
@@ -475,7 +362,7 @@ newsletterDisclaimer: 'எப்போதும் ஸ்பேம் இல்�
       organicFarms: '24+ இயற்கை பண்ணைகள்',
       packaging: 'பொதிதல்',
       recyclableGlassTin: '100% மீண்டும் பயன்படுத்தக்கூடிய கண்ணாடி & டின்',
-      
+
       // Bulk Orders
       bulkOrdersTagline: 'உணவகங்கள், பேக்கரி & சில்லறை விற்பனையாளர்களுக்கு',
       wholesaleHeading: 'மொத்த விற்பனை & பெரிய வழங்கல்: 5L முதல் 100L',
@@ -483,7 +370,7 @@ newsletterDisclaimer: 'எப்போதும் ஸ்பேம் இல்�
       volumeSavings: 'அளவு சேமிப்பு',
       batchCapacity: 'குவியல் திறன்',
       getWholesaleQuote: 'மொத்த விற்பனை மேற்கோள் பெற',
-      
+
       // Checkout & Cart
       quickCheckout: 'செக்-அவுட் தொடர்க',
       totalAmount: 'மொத்தத் தொகை',
@@ -504,7 +391,7 @@ newsletterDisclaimer: 'எப்போதும் ஸ்பேம் இல்�
       pincode: 'அஞ்சல் குறியீடு',
       cashOnDelivery: 'பொருள் வந்ததும் பணம் செலுத்துங்கள்',
       onlinePayment: 'ஆன்லைன் மூலம் பணம் செலுத்துங்கள்',
-      
+
       // Admin Panel
       adminPortal: 'நிர்வாகி டாஷ்போர்டு',
       adminPanel: 'நிர்வாகி பேனல்',
@@ -542,7 +429,7 @@ newsletterDisclaimer: 'எப்போதும் ஸ்பேம் இல்�
       hundredPure: '100% தூய்மையானது',
       farmExpress: 'வேகமான விநியோகம்',
       easyReturns: 'எளிதான வருவாய்',
-      
+
       // Products Page
       popularity: 'பிரபலம்',
       priceLowHigh: 'விலை: குறைந்த முதல் உயர்',
@@ -556,7 +443,7 @@ newsletterDisclaimer: 'எப்போதும் ஸ்பேம் இல்�
       productType: 'பொருளின் வகை',
       noPreservatives: 'பாதுகாப்பு இல்லை',
       virgin: 'கன்னிய',
-      
+
       // Authentication
       signInHeader: 'உங்கள் கணக்கில் உள்நுழைக',
       createAccountHeader: 'புதிய கணக்கை உருவாக்கவும்',
@@ -569,14 +456,24 @@ newsletterDisclaimer: 'எப்போதும் ஸ்பேம் இல்�
       or: 'அல்லது',
       dontHaveAccount: 'கணக்கு இல்லையா?',
       registerHere: 'இங்கே பதிவு செய்க →',
-      
+
+      // Featured Products
+      handpickedOrganic: 'கைமுறையாக தேர்ந்தெடுக்கப்பட்ட இயற்கை தூய பொருட்கள்',
+      straightFrom: 'தமிழ்நாடு மரச்செக்கு அலகுகளிலிருந்து உங்கள் சமையலறைக்கு நேரடியாக — தூய, கலப்படமில்லாத, மற்றும் ஊட்டச்சத்து நிறைந்தது.',
+      viewAllProducts: 'அனைத்து பொருட்களையும் காண்க',
+      addedToCart: 'கூடையில் சேர்க்கப்பட்டது!',
+      packageUnit: 'தொகுப்பு அலகு:',
+      bestSeller: 'சிறந்த விற்பனை',
+      pure: 'தூய்மையானது',
+      fresh: 'புதியவை',
+
       // Common
       fssaiCertifiedLabel: 'FSSAI சான்றளிக்கப்பட்டது',
       hundredColdPressed: '100% மரச்செக்கு',
       organicQualityGuarantee: '100% இயற்கை தரம் உறுதி',
       directFarmSourcing: 'நேரடி பண்ணை மூலாதாரம்',
       fssaiApprovedLab: 'FSSAI அனுமதிக்கப்பட்ட லேப் பகுப்பாய்வு',
-      
+
       // Footer
       footerAbout: 'எங்களை பற்றி',
       footerDescription: 'JM இயற்கை தமிழ்நாடு பண்ணைகளில் இருந்து நேரடியாக உங்கள் வீட்டிற்கு தூய, அறியக்கூடிய இயற்கை பொருட்களை கொண்டுவருகிறது.',
@@ -585,13 +482,90 @@ newsletterDisclaimer: 'எப்போதும் ஸ்பேம் இல்�
       footerRights: 'அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை',
       footerPrivacy: 'தனியுரிமை கொள்கை',
       footerTerms: 'சேவை விதிமுறைகள்',
-      
+
+      // Nutrition Page
+      nutritionTitle: 'ஊட்டச்சத்து பகுப்பாய்வு & ஆய்வக சோதனை முடிவுகள்',
+      nutritionSubtitle: 'JM Organic மரச்செக்கு எண்ணெய்களுக்கான முழு கொழுப்பு அமில சுயவிவரம், ஆன்டிஆக்ஸிடன்ட் அளவுகள், MCT பிரிப்பு மற்றும் சான்றளிக்கப்பட்ட ஆய்வக தூய்மை முடிவுகளை ஆராயுங்கள்.',
+      viewCertificate: 'அதிகாரப்பூர்வ ஆய்வக சான்றிதழைக் காண்க',
+      smokePoint: 'புகை புள்ளி',
+      extractionMethod: 'பிரித்தெடுத்தல் முறை',
+      woodPressed: 'மரச்செக்கு (28°C)',
+      dailyIntake: 'தினசரி உட்கொள்ளல் கால்குலேட்டர்',
+      dailyIntakeDesc: 'உங்கள் சரியான உணவு உட்கொள்ளலை கணக்கிட தினசரி அளவை சரிசெய்யவும்:',
+      dailyConsumption: 'தினசரி நுகர்வு',
+      day: 'நாள்',
+      tsp: 'தேக்கரண்டி',
+      tbsp: 'தேக்கரண்டி',
+      cooking: 'சமையல்',
+      energy: 'ஆற்றல்',
+      totalMCTs: 'மொத்த MCT கள்',
+      fattyAcidComposition: 'கொழுப்பு அமில கலவை & ஊட்டச்சத்துக்கள்',
+      gcmsAnalysis: 'ஒவ்வொரு 100g மாதிரிக்கும் கேஸ் குரோமடோகிராபி (GC-MS) பகுப்பாய்வு.',
+      labPurityReport: 'சான்றளிக்கப்பட்ட ஆய்வக தூய்மை அறிக்கை',
+      peroxideValue: 'பெராக்சைடு மதிப்பு (PV)',
+      freeFattyAcid: 'இலவச கொழுப்பு அமிலம் (FFA)',
+      heavyMetals: 'கன உலோகங்கள் (ஈயம், ஆர்சனிக், பாதரசம்)',
+      solventResidue: 'கரைப்பான் எச்சம் & ஹெக்சேன்',
+      moistureContent: 'ஈரப்பதம் உள்ளடக்கம்',
+      immunityIndex: 'நோய் எதிர்ப்பு குறியீடு',
+      metabolismScore: 'வளர்சிதை மாற்ற மதிப்பெண்',
+      cardiovascular: 'இதயம்',
+      fssaiCertifiedLabReport: 'FSSAI சான்றளிக்கப்பட்ட பகுப்பாய்வு ஆய்வக அறிக்கை',
+      certificateQuality: 'JM Organic தரம் & தூய்மை சான்றிதழ்',
+      issuedBy: 'NABL அங்கீகாரம் பெற்ற உணவு தர சோதனை மையம் • கோயம்புத்தூர்',
+      sampleTested: 'சோதிக்கப்பட்ட மாதிரி',
+      batchCode: 'தொகுதி குறியீடு',
+      chemicalSolventsTest: 'இரசாயன கரைப்பான்கள் சோதனை',
+      passed: 'தேர்ச்சி (0.0% ஹெக்சேன் / பூஜ்ஜிய ப்ளீச்)',
+      heavyMetalsToxins: 'கன உலோகங்கள் & நச்சுகள்',
+      labRating: 'ஆய்வக மதிப்பீடு',
+      gradeA: 'தரம் A+ (100% தூய இயற்கை)',
+      qrVerified: 'QR குறியீடு சரிபார்க்கப்பட்டது • சான்றிதழ் ID: JM-NABL-2026',
+      printCertificate: 'சான்றிதழை அச்சிடுக',
+      quantity: 'அளவு',
+
+      // Nutrition Page - Additional
+      ourOils: 'எங்கள் எண்ணெய்கள்',
+      inCart: 'கூடையில் உள்ளது',
+      addMore: 'மேலும் சேர்க்க',
+      viewCart: 'கூடையை காண்க',
+
       // Newsletter
-      newsletterTitle: 'எங்கள் செய்திமடலுக்கு குழுசேரவும்',
-      newsletterSubtitle: 'புதிய பொருட்கள் மற்றும் சிறப்பு சலுகைகள் பற்றிய சமீபத்திய புதுப்பிப்புகளைப் பெறுங்கள்',
       emailPlaceholder: 'உங்கள் மின்னஞ்சலை உள்ளிடவும்',
       subscribe: 'பதிவு செய்க',
-      
+      newsletterBadge: '25,000+ இயற்கை உணவு ஆர்வலர்களுடன் இணையுங்கள்',
+      newsletterTitle: 'உங்கள் முதல் மரச்செக்கு ஆர்டரில் 10% தள்ளுபடி பெறுங்கள்',
+      newsletterSubtitle: 'எங்கள் வாராந்திர பண்ணை அறுவடை செய்திமடலுக்கு குழுசேரவும், பிரத்யேக தள்ளுபடி கூப்பன்கள், ஆரோக்கியமான எண்ணெய் பயன்பாட்டு உதவிக்குறிப்புகள் மற்றும் புதிய பொருட்கள் அறிவிப்புகளைப் பெறுங்கள்.',
+      newsletterSuccess: 'நன்றி! கூப்பன் குறியீடு ORGANIC10 உங்கள் மின்னஞ்சலுக்கு அனுப்பப்பட்டுள்ளது.',
+      newsletterClaim: '10% தள்ளுபடி பெறுக',
+      newsletterDisclaimer: 'எப்போதும் ஸ்பேம் இல்லை. எந்த நேரத்திலும் ஒரு கிளிக்கில் குழுவிலகலாம்.',
+
+      // Testimonials
+      testimonialsTitle: 'இந்தியா முழுவதும் 12,000+ குடும்பங்கள் & சமையல்காரர்களால் நம்பப்படுகிறது',
+      testimonialsSubtitle: 'எங்கள் மரச்செக்கு எண்ணெய்கள் மற்றும் இயற்கை பண்ணை பொருட்களைப் பற்றி எங்கள் சரிபார்க்கப்பட்ட வாங்குபவர்கள் என்ன சொல்கிறார்கள் என்பதைப் படியுங்கள்.',
+      verified: 'சரிபார்க்கப்பட்டது',
+      realCustomerReviews: 'உண்மையான வாடிக்கையாளர் மதிப்பீடுகள்',
+
+      // Reviews Page
+      reviewsPageTitle: 'சரிபார்க்கப்பட்ட பண்ணை மதிப்பீடுகள் & மதிப்புரைகள்',
+      reviewsPageSubtitle: 'JM Organic மரச்செக்கு எண்ணெய்களை நம்பும் தென்னிந்தியா முழுவதும் 12,000+ குடும்பங்களின் உண்மையான கருத்துகளைப் படியுங்கள்.',
+      basedOn: 'அடிப்படையில்',
+      verifiedOrders: 'சரிபார்க்கப்பட்ட ஆர்டர்கள்',
+      stars: 'நட்சத்திரங்கள்',
+      allReviews: 'அனைத்து மதிப்பீடுகளும்',
+      product: 'பொருள்',
+      helpful: 'பயனுள்ளதாக',
+      yourName: 'உங்கள் பெயர்',
+      namePlaceholder: 'பிரியா சுந்தரம்',
+      selectProduct: 'பொருளைத் தேர்ந்தெடுக்கவும்',
+      starRating: 'நட்சத்திர மதிப்பீடு',
+      reviewTitle: 'மதிப்பீட்டு தலைப்பு',
+      titlePlaceholder: 'எ.கா. தூய, நறுமணமான மற்றும் புதிய!',
+      detailedReview: 'விரிவான மதிப்பீடு',
+      commentPlaceholder: 'வாசனை, சுவை மற்றும் தரம் பற்றி எங்களுக்கு சொல்லுங்கள்...',
+      submitReview: 'மதிப்பீட்டை சமர்ப்பிக்கவும்',
+      writeReviewSubtitle: 'JM Organic மரச்செக்கு எண்ணெய்களுடன் உங்கள் அனுபவத்தைப் பகிரவும்.',
+
       // Product Detail
       productNotFound: 'பொருள் கிடைக்கவில்லை',
       productNotFoundDesc: 'நீங்கள் தேடும் பொருள் நகர்த்தப்பட்டிருக்கலாம் அல்லது அகற்றப்பட்டிருக்கலாம்.',
