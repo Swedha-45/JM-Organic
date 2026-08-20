@@ -9,7 +9,7 @@ import './LoginPage.css';
 function LoginPage() {
   const navigate = useNavigate();
   const { login, googleAuth, isAuthenticated } = useAuth();
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -54,7 +54,7 @@ function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setGeneralError('');
-    
+
     if (!validateForm()) {
       return;
     }
@@ -67,7 +67,12 @@ function LoginPage() {
         if (rememberMe) {
           localStorage.setItem('rememberMe', 'true');
         }
-        navigate('/');
+        // ✅ Check if user is admin and redirect to admin dashboard
+        if (user.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
       }
     } catch (error) {
       setGeneralError(error.message || 'Invalid email or password');
@@ -76,16 +81,21 @@ function LoginPage() {
     }
   };
 
-  // ✅ Firebase Google Login Handler
+  // ✅ Google Login Handler
   const handleGoogleSuccess = async (credentialResponse) => {
     setGeneralError('');
     setLoading(true);
-    
+
     try {
       const idToken = credentialResponse?.token || credentialResponse?.credential;
       const user = await googleAuth(idToken);
       if (user) {
-        navigate('/');
+        // ✅ Check if user is admin and redirect to admin dashboard
+        if (user.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
       }
     } catch (error) {
       console.error('Google login error:', error);
@@ -98,6 +108,11 @@ function LoginPage() {
   const handleGoogleError = () => {
     setGeneralError('Google login failed.');
     setLoading(false);
+  };
+
+  // ✅ Handle Tamil toggler - redirect to admin login
+  const handleTamilToggle = () => {
+    navigate('/admin/login');
   };
 
   return (
@@ -161,12 +176,14 @@ function LoginPage() {
               <span className="login-logo-title">JM Organic</span>
             </Link>
 
-            <button 
-              type="button" 
-              className="flex items-center gap-1 px-3.5 py-1.5 rounded-full border border-brand-border bg-white text-xs font-bold text-emerald-900 shadow-xs"
+            {/* ✅ Tamil Toggler - redirects to admin login */}
+            <button
+              type="button"
+              onClick={handleTamilToggle}
+              className="flex items-center gap-1 px-3.5 py-1.5 rounded-full border border-brand-border bg-white text-xs font-bold text-emerald-900 shadow-xs hover:bg-emerald-50 transition-colors cursor-pointer"
             >
-              <span className="text-[10px] text-muted-foreground uppercase">IN</span>
-              <span>தமிழ்</span>
+              <span className="text-[10px] text-muted-foreground uppercase">ENG</span>
+              <span>ADMIN</span>
             </button>
           </div>
 
@@ -258,8 +275,8 @@ function LoginPage() {
                 </Link>
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="login-primary-btn"
                 disabled={loading}
               >

@@ -1,12 +1,12 @@
 // pages/CheckoutPage.jsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  CheckCircle2, 
-  ShieldCheck, 
-  Truck, 
-  Lock, 
+import {
+  ArrowLeft,
+  CheckCircle2,
+  ShieldCheck,
+  Truck,
+  Lock,
   MapPin,
   User,
   Phone,
@@ -179,7 +179,7 @@ const CheckoutPage = () => {
           } catch (verifyErr) {
             console.error('Verification error:', verifyErr);
             setPaymentError(
-              verifyErr.message || 
+              verifyErr.message ||
               'Payment was received but order verification failed. Please contact support.'
             );
           } finally {
@@ -360,9 +360,8 @@ const CheckoutPage = () => {
                         value={formData.name}
                         onChange={(e) => handleChange('name', e.target.value)}
                         placeholder="e.g. Anbu Selvan"
-                        className={`w-full pl-11 pr-4 py-3 rounded-2xl border ${
-                          errors.name ? 'border-red-500 focus:ring-red-500' : 'border-brand-border focus:ring-brand-primary'
-                        } bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2`}
+                        className={`w-full pl-11 pr-4 py-3 rounded-2xl border ${errors.name ? 'border-red-500 focus:ring-red-500' : 'border-brand-border focus:ring-brand-primary'
+                          } bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2`}
                       />
                     </div>
                     {errors.name && <p className="text-[11px] text-red-500 font-semibold mt-1">{errors.name}</p>}
@@ -379,9 +378,8 @@ const CheckoutPage = () => {
                         value={formData.email}
                         onChange={(e) => handleChange('email', e.target.value)}
                         placeholder="anbu@example.com"
-                        className={`w-full pl-11 pr-4 py-3 rounded-2xl border ${
-                          errors.email ? 'border-red-500 focus:ring-red-500' : 'border-brand-border focus:ring-brand-primary'
-                        } bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2`}
+                        className={`w-full pl-11 pr-4 py-3 rounded-2xl border ${errors.email ? 'border-red-500 focus:ring-red-500' : 'border-brand-border focus:ring-brand-primary'
+                          } bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2`}
                       />
                     </div>
                     {errors.email && <p className="text-[11px] text-red-500 font-semibold mt-1">{errors.email}</p>}
@@ -400,9 +398,8 @@ const CheckoutPage = () => {
                         value={formData.phone}
                         onChange={(e) => handleChange('phone', e.target.value)}
                         placeholder="+91 98765 43210"
-                        className={`w-full pl-11 pr-4 py-3 rounded-2xl border ${
-                          errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-brand-border focus:ring-brand-primary'
-                        } bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2`}
+                        className={`w-full pl-11 pr-4 py-3 rounded-2xl border ${errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-brand-border focus:ring-brand-primary'
+                          } bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2`}
                       />
                     </div>
                     {errors.phone && <p className="text-[11px] text-red-500 font-semibold mt-1">{errors.phone}</p>}
@@ -417,9 +414,8 @@ const CheckoutPage = () => {
                       value={formData.pincode}
                       onChange={(e) => handleChange('pincode', e.target.value)}
                       placeholder="6-digit Pincode"
-                      className={`w-full px-4 py-3 rounded-2xl border ${
-                        errors.pincode ? 'border-red-500 focus:ring-red-500' : 'border-brand-border focus:ring-brand-primary'
-                      } bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2`}
+                      className={`w-full px-4 py-3 rounded-2xl border ${errors.pincode ? 'border-red-500 focus:ring-red-500' : 'border-brand-border focus:ring-brand-primary'
+                        } bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2`}
                     />
                     {errors.pincode && <p className="text-[11px] text-red-500 font-semibold mt-1">{errors.pincode}</p>}
                   </div>
@@ -436,9 +432,8 @@ const CheckoutPage = () => {
                       value={formData.address}
                       onChange={(e) => handleChange('address', e.target.value)}
                       placeholder="Door No., Street name, Area, City"
-                      className={`w-full pl-11 pr-4 py-3 rounded-2xl border ${
-                        errors.address ? 'border-red-500 focus:ring-red-500' : 'border-brand-border focus:ring-brand-primary'
-                      } bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2`}
+                      className={`w-full pl-11 pr-4 py-3 rounded-2xl border ${errors.address ? 'border-red-500 focus:ring-red-500' : 'border-brand-border focus:ring-brand-primary'
+                        } bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2`}
                     />
                   </div>
                   {errors.address && <p className="text-[11px] text-red-500 font-semibold mt-1">{errors.address}</p>}
@@ -452,17 +447,16 @@ const CheckoutPage = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <label
                       onClick={() => setFormData({ ...formData, paymentMethod: 'cod' })}
-                      className={`p-4 rounded-2xl border cursor-pointer flex items-center gap-3 transition-all ${
-                        formData.paymentMethod === 'cod'
+                      className={`p-4 rounded-2xl border cursor-pointer flex items-center gap-3 transition-all ${formData.paymentMethod === 'cod'
                           ? 'border-brand-primary bg-brand-secondary/40 shadow-sm'
                           : 'border-brand-border bg-white hover:bg-brand-light'
-                      }`}
+                        }`}
                     >
                       <input
                         type="radio"
                         name="payment"
                         checked={formData.paymentMethod === 'cod'}
-                        onChange={() => {}}
+                        onChange={() => { }}
                         className="text-brand-primary"
                       />
                       <div>
@@ -473,17 +467,16 @@ const CheckoutPage = () => {
 
                     <label
                       onClick={() => setFormData({ ...formData, paymentMethod: 'online' })}
-                      className={`p-4 rounded-2xl border cursor-pointer flex items-center gap-3 transition-all ${
-                        formData.paymentMethod === 'online'
+                      className={`p-4 rounded-2xl border cursor-pointer flex items-center gap-3 transition-all ${formData.paymentMethod === 'online'
                           ? 'border-brand-primary bg-brand-secondary/40 shadow-sm'
                           : 'border-brand-border bg-white hover:bg-brand-light'
-                      }`}
+                        }`}
                     >
                       <input
                         type="radio"
                         name="payment"
                         checked={formData.paymentMethod === 'online'}
-                        onChange={() => {}}
+                        onChange={() => { }}
                         className="text-brand-primary"
                       />
                       <div>

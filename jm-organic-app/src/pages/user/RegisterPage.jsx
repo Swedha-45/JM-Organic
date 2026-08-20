@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, Navigate } from 'react-router-dom';
 import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import GoogleSignIn from '../../components/GoogleSignIn'; // ✅ Import GoogleSignIn
+import GoogleSignIn from '../../components/GoogleSignIn';
 import './LoginPage.css';
 
 function RegisterPage() {
@@ -19,39 +19,117 @@ function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const [fieldErrors, setFieldErrors] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    password: ''
+  });
+
   if (userLoggedIn) {
     return <Navigate to="/" replace />;
   }
 
+  const validateFirstName = (name) => {
+    if (!name || name.trim().length === 0) {
+      return 'First Name is required.';
+    }
+    if (name.trim().length < 2) {
+      return 'First Name must be at least 2 characters.';
+    }
+    return '';
+  };
+
+  const validateLastName = (name) => {
+    if (name && name.trim().length > 0 && name.trim().length < 2) {
+      return 'Last Name must be at least 2 characters.';
+    }
+    return '';
+  };
+
+  const validateEmail = (email) => {
+    if (!email || email.trim().length === 0) {
+      return 'Email is required.';
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      return 'Please enter a valid email address.';
+    }
+    return '';
+  };
+
+  const validatePhone = (phone) => {
+    if (!phone || phone.trim().length === 0) {
+      return '';
+    }
+    const phoneRegex = /^(?:\+91[\s-]?)?[6-9]\d{9}$/;
+    if (!phoneRegex.test(phone.trim().replace(/\s/g, ''))) {
+      return 'Please enter a valid 10-digit Indian phone number.';
+    }
+    return '';
+  };
+
+  const validatePassword = (password) => {
+    if (!password || password.length === 0) {
+      return 'Password is required.';
+    }
+    if (password.length < 6) {
+      return 'Password must be at least 6 characters.';
+    }
+    return '';
+  };
+
+  const handleBlur = (field) => {
+    let error = '';
+    switch (field) {
+      case 'firstName':
+        error = validateFirstName(firstName);
+        break;
+      case 'lastName':
+        error = validateLastName(lastName);
+        break;
+      case 'email':
+        error = validateEmail(email);
+        break;
+      case 'phone':
+        error = validatePhone(phone);
+        break;
+      case 'password':
+        error = validatePassword(password);
+        break;
+      default:
+        break;
+    }
+    setFieldErrors(prev => ({ ...prev, [field]: error }));
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
     setErrorMsg('');
+    setFieldErrors({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      password: ''
+    });
 
-    // ✅ Better validation
-    if (!firstName.trim()) {
-      setErrorMsg('First Name is required.');
-      return;
-    }
+    const firstNameError = validateFirstName(firstName);
+    const lastNameError = validateLastName(lastName);
+    const emailError = validateEmail(email);
+    const phoneError = validatePhone(phone);
+    const passwordError = validatePassword(password);
 
-    if (!email.trim()) {
-      setErrorMsg('Email is required.');
-      return;
-    }
+    setFieldErrors({
+      firstName: firstNameError,
+      lastName: lastNameError,
+      email: emailError,
+      phone: phoneError,
+      password: passwordError
+    });
 
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setErrorMsg('Please enter a valid email address.');
-      return;
-    }
-
-    if (!password) {
-      setErrorMsg('Password is required.');
-      return;
-    }
-
-    if (password.length < 6) {
-      setErrorMsg('Password must be at least 6 characters.');
+    if (firstNameError || lastNameError || emailError || phoneError || passwordError) {
       return;
     }
 
@@ -59,26 +137,26 @@ function RegisterPage() {
     try {
       await register({
         name: `${firstName} ${lastName}`.trim(),
-        firstName,
-        lastName,
-        email,
-        phone,
+        firstName: firstName.trim(),
+        lastName: lastName.trim() || '',
+        email: email.trim(),
+        phone: phone.trim() || '',
         password,
       });
       navigate('/');
     } catch (err) {
       console.error('Registration error:', err);
-      setErrorMsg(err.message || 'Registration failed. Try again.');
+      setErrorMsg(err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Real Google Sign In handler (same pattern as LoginPage)
+  // ✅ Google Sign In handler
   const handleGoogleSuccess = async (credentialResponse) => {
     setErrorMsg('');
     setLoading(true);
-    
+
     try {
       const idToken = credentialResponse?.token || credentialResponse?.credential;
       const user = await googleAuth(idToken);
@@ -98,10 +176,15 @@ function RegisterPage() {
     setLoading(false);
   };
 
+  // ✅ Handle Tamil toggler - redirect to admin login
+  const handleTamilToggle = () => {
+    navigate('/admin/login');
+  };
+
   return (
     <div className="login-page-container">
       <div className="login-split-grid">
-        
+
         {/* Left Side - Banner */}
         <div className="login-left-banner">
           <img
@@ -143,25 +226,26 @@ function RegisterPage() {
 
         {/* Right Side - Form Section */}
         <div className="login-right-section">
-          
+
           <div className="login-right-header">
             <Link to="/" className="login-brand-logo">
               <div className="login-logo-icon">🌿</div>
               <span className="login-logo-title">JM Organic</span>
             </Link>
 
-            <button 
-              type="button" 
-              className="flex items-center gap-1 px-3 py-1 rounded-full border border-brand-border bg-white text-xs font-bold text-emerald-900"
+            {/* ✅ Tamil Toggler - redirects to admin login */}
+            <button
+              type="button"
+              onClick={handleTamilToggle}
+              className="flex items-center gap-1 px-3 py-1 rounded-full border border-brand-border bg-white text-xs font-bold text-emerald-900 hover:bg-emerald-50 transition-colors cursor-pointer"
             >
-              <span className="text-[10px] text-muted-foreground uppercase">IN</span>
-              <span>தமிழ்</span>
+              <span className="text-[10px] text-muted-foreground uppercase">ENG</span>
+              <span>ADMIN</span>
             </button>
           </div>
 
           <div className="login-form-center">
-            
-            {/* Capsule Switcher Tab */}
+
             <div className="login-tab-switcher">
               <button
                 type="button"
@@ -184,7 +268,7 @@ function RegisterPage() {
               </div>
             )}
 
-            <form onSubmit={handleRegister}>
+            <form onSubmit={handleRegister} noValidate>
               <div className="grid grid-cols-2 gap-3">
                 <div className="login-input-group">
                   <label className="login-input-label">FIRST NAME</label>
@@ -192,10 +276,14 @@ function RegisterPage() {
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
+                    onBlur={() => handleBlur('firstName')}
                     placeholder="Priya"
-                    className="login-sage-input"
+                    className={`login-sage-input ${fieldErrors.firstName ? 'border-red-500 bg-red-50' : ''}`}
                     required
                   />
+                  {fieldErrors.firstName && (
+                    <span className="text-[11px] font-bold text-red-600 pl-2 mt-1 block">{fieldErrors.firstName}</span>
+                  )}
                 </div>
 
                 <div className="login-input-group">
@@ -204,9 +292,13 @@ function RegisterPage() {
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
+                    onBlur={() => handleBlur('lastName')}
                     placeholder="Sundaram"
-                    className="login-sage-input"
+                    className={`login-sage-input ${fieldErrors.lastName ? 'border-red-500 bg-red-50' : ''}`}
                   />
+                  {fieldErrors.lastName && (
+                    <span className="text-[11px] font-bold text-red-600 pl-2 mt-1 block">{fieldErrors.lastName}</span>
+                  )}
                 </div>
               </div>
 
@@ -216,10 +308,14 @@ function RegisterPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onBlur={() => handleBlur('email')}
                   placeholder="priya@email.com"
-                  className="login-sage-input"
+                  className={`login-sage-input ${fieldErrors.email ? 'border-red-500 bg-red-50' : ''}`}
                   required
                 />
+                {fieldErrors.email && (
+                  <span className="text-[11px] font-bold text-red-600 pl-2 mt-1 block">{fieldErrors.email}</span>
+                )}
               </div>
 
               <div className="login-input-group">
@@ -228,9 +324,13 @@ function RegisterPage() {
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  onBlur={() => handleBlur('phone')}
                   placeholder="+91 98765 43210"
-                  className="login-sage-input"
+                  className={`login-sage-input ${fieldErrors.phone ? 'border-red-500 bg-red-50' : ''}`}
                 />
+                {fieldErrors.phone && (
+                  <span className="text-[11px] font-bold text-red-600 pl-2 mt-1 block">{fieldErrors.phone}</span>
+                )}
               </div>
 
               <div className="login-input-group">
@@ -240,8 +340,9 @@ function RegisterPage() {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    onBlur={() => handleBlur('password')}
                     placeholder="At least 6 characters"
-                    className="login-sage-input"
+                    className={`login-sage-input ${fieldErrors.password ? 'border-red-500 bg-red-50' : ''}`}
                     required
                   />
                   <button
@@ -252,6 +353,9 @@ function RegisterPage() {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                {fieldErrors.password && (
+                  <span className="text-[11px] font-bold text-red-600 pl-2 mt-1 block">{fieldErrors.password}</span>
+                )}
               </div>
 
               <button
@@ -268,7 +372,6 @@ function RegisterPage() {
               <span>or</span>
             </div>
 
-            {/* ✅ Real GoogleSignIn component - same pattern as LoginPage */}
             <div className="flex justify-center">
               <GoogleSignIn
                 onSuccess={handleGoogleSuccess}

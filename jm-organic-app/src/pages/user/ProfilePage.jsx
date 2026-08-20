@@ -1,11 +1,11 @@
 // pages/ProfilePage.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ShoppingBag, 
-  MapPin, 
-  Award, 
-  LogOut, 
+import {
+  ShoppingBag,
+  MapPin,
+  Award,
+  LogOut,
   ChevronRight,
   ShieldCheck,
   Star,
@@ -66,29 +66,29 @@ const ProfilePage = () => {
 
     setLoadingOrders(true);
     setError(null);
-    
+
     try {
       console.log('🔍 Fetching orders for user:', currentUser.email);
-      
+
       // ✅ Get orders from backend
       const response = await orderAPI.getAll();
       console.log('📦 Orders API response:', response);
-      
+
       const orders = response.orders || [];
-      
+
       // ✅ Filter orders by user email (check multiple fields)
       const userEmail = currentUser.email.toLowerCase();
       const filteredOrders = orders.filter(order => {
-        const orderEmail = order.user?.email?.toLowerCase() || 
-                          order.email?.toLowerCase() || 
-                          order.shippingAddress?.email?.toLowerCase() ||
-                          '';
+        const orderEmail = order.user?.email?.toLowerCase() ||
+          order.email?.toLowerCase() ||
+          order.shippingAddress?.email?.toLowerCase() ||
+          '';
         return orderEmail === userEmail;
       });
-      
+
       console.log('✅ Filtered orders:', filteredOrders.length);
       setUserOrders(filteredOrders);
-      
+
     } catch (err) {
       console.error('❌ Error fetching orders:', err);
       setError(err.message || 'Failed to load orders');
@@ -111,7 +111,7 @@ const ProfilePage = () => {
     setSaveMessage({ type: '', text: '' });
     try {
       const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-      
+
       // ✅ Update profile with full address
       await updateProfile({
         name: fullName,
@@ -125,12 +125,12 @@ const ProfilePage = () => {
           pincode: formData.pincode
         }
       });
-      
+
       setSaveMessage({ type: 'success', text: 'Profile updated successfully!' });
-      
+
       // ✅ Refresh orders after profile update
       setTimeout(fetchUserOrders, 1000);
-      
+
     } catch (err) {
       console.error('Error updating profile:', err);
       setSaveMessage({ type: 'error', text: err.message || 'Failed to update profile.' });
@@ -183,11 +183,11 @@ const ProfilePage = () => {
   return (
     <div className="min-h-screen bg-[#F3F7F2] py-6 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-6xl">
-        
+
         {/* Header User Banner */}
         <div className="bg-white rounded-3xl border p-6 sm:p-8 shadow-md mb-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-            
+
             <div className="flex items-center gap-5">
               <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-emerald-900 text-amber-400 flex items-center justify-center font-black text-2xl sm:text-3xl shadow-md border-4 border-emerald-100 shrink-0">
                 {avatarInitial}
@@ -241,7 +241,7 @@ const ProfilePage = () => {
 
         {/* Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
+
           {/* Left Sidebar Navigation Pills */}
           <div className="lg:col-span-3 space-y-2">
             <div className="bg-white rounded-3xl border p-3 shadow-md">
@@ -254,11 +254,10 @@ const ProfilePage = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
-                    activeTab === tab.id
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-bold transition-all ${activeTab === tab.id
                       ? 'bg-emerald-900 text-white shadow-sm'
                       : 'text-emerald-950 hover:bg-emerald-50'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-3">
                     <tab.icon className="w-4 h-4" />
@@ -272,7 +271,7 @@ const ProfilePage = () => {
 
           {/* Right Main Tab Content */}
           <div className="lg:col-span-9">
-            
+
             {/* Orders Tab */}
             {activeTab === 'orders' && (
               <div className="space-y-6">
@@ -325,21 +324,20 @@ const ProfilePage = () => {
                               #{order._id?.slice(-6).toUpperCase() || order.id}
                             </span>
                             <div className="text-[11px] text-gray-500 mt-2 font-medium">
-                              {new Date(order.orderDate || order.createdAt || Date.now()).toLocaleDateString('en-IN', { 
-                                day: 'numeric', 
-                                month: 'short', 
-                                year: 'numeric' 
+                              {new Date(order.orderDate || order.createdAt || Date.now()).toLocaleDateString('en-IN', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric'
                               })}
                             </div>
                           </div>
 
                           <div className="text-right">
                             <div className="text-base font-black text-emerald-950">₹{order.total}</div>
-                            <span className={`inline-block text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full mt-1 ${
-                              order.status === 'delivered' || order.status === 'completed'
+                            <span className={`inline-block text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full mt-1 ${order.status === 'delivered' || order.status === 'completed'
                                 ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                                 : 'bg-amber-100 text-amber-800 border border-amber-200'
-                            }`}>
+                              }`}>
                               {order.status || 'Processing'}
                             </span>
                           </div>
@@ -426,13 +424,12 @@ const ProfilePage = () => {
             {activeTab === 'settings' && (
               <div className="bg-white rounded-3xl border p-6 sm:p-8 shadow-md">
                 <h2 className="text-xl font-extrabold text-emerald-950 mb-6">Account Settings</h2>
-                
+
                 {saveMessage.text && (
-                  <div className={`p-4 mb-4 rounded-2xl text-xs font-bold ${
-                    saveMessage.type === 'success' 
-                      ? 'bg-emerald-50 text-emerald-900 border border-emerald-200' 
+                  <div className={`p-4 mb-4 rounded-2xl text-xs font-bold ${saveMessage.type === 'success'
+                      ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
                       : 'bg-red-50 text-red-900 border border-red-200'
-                  }`}>
+                    }`}>
                     {saveMessage.text}
                   </div>
                 )}
@@ -444,7 +441,7 @@ const ProfilePage = () => {
                       <input
                         type="text"
                         value={formData.firstName}
-                        onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                         placeholder="Not set"
                         className="w-full bg-gray-50 px-4 py-2.5 rounded-full text-xs font-bold text-emerald-950 border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                       />
@@ -454,7 +451,7 @@ const ProfilePage = () => {
                       <input
                         type="text"
                         value={formData.lastName}
-                        onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                         placeholder="Not set"
                         className="w-full bg-gray-50 px-4 py-2.5 rounded-full text-xs font-bold text-emerald-950 border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                       />
@@ -476,7 +473,7 @@ const ProfilePage = () => {
                     <input
                       type="tel"
                       value={formData.phone}
-                      onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="Not set"
                       className="w-full bg-gray-50 px-4 py-2.5 rounded-full text-xs font-bold text-emerald-950 border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                     />
@@ -487,7 +484,7 @@ const ProfilePage = () => {
                     <input
                       type="text"
                       value={formData.address}
-                      onChange={(e) => setFormData({...formData, address: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                       placeholder="Not set"
                       className="w-full bg-gray-50 px-4 py-2.5 rounded-full text-xs font-bold text-emerald-950 border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                     />
@@ -499,7 +496,7 @@ const ProfilePage = () => {
                       <input
                         type="text"
                         value={formData.city}
-                        onChange={(e) => setFormData({...formData, city: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                         placeholder="Not set"
                         className="w-full bg-gray-50 px-4 py-2.5 rounded-full text-xs font-bold text-emerald-950 border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                       />
@@ -509,7 +506,7 @@ const ProfilePage = () => {
                       <input
                         type="text"
                         value={formData.state}
-                        onChange={(e) => setFormData({...formData, state: e.target.value})}
+                        onChange={(e) => setFormData({ ...formData, state: e.target.value })}
                         placeholder="Not set"
                         className="w-full bg-gray-50 px-4 py-2.5 rounded-full text-xs font-bold text-emerald-950 border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                       />
@@ -521,7 +518,7 @@ const ProfilePage = () => {
                     <input
                       type="text"
                       value={formData.pincode}
-                      onChange={(e) => setFormData({...formData, pincode: e.target.value})}
+                      onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
                       placeholder="Not set"
                       className="w-full bg-gray-50 px-4 py-2.5 rounded-full text-xs font-bold text-emerald-950 border border-gray-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                     />
