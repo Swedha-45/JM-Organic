@@ -1,8 +1,9 @@
 const express = require('express');
-const mongoose = require('mongoose'); // ✅ Add this!
+const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const compression = require('compression');
+const path = require('path'); // ✅ Add this for uploads
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ const adminRoutes = require('./routes/adminRoutes');
 const seedRoutes = require('./routes/seedRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
+const uploadRoutes = require('./routes/uploadRoutes'); // ✅ Add upload routes
 
 const app = express();
 
@@ -25,11 +27,15 @@ app.set('etag', 'strong');
 // Enable Gzip Compression for low payload sizes and faster data transfer latency
 app.use(compression());
 
+// ✅ Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // Middleware
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:3000',
   credentials: true
 }));
+
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
   res.setHeader("Connection", "keep-alive");
@@ -39,6 +45,7 @@ app.use((req, res, next) => {
   }
   next();
 });
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
@@ -59,6 +66,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/seed', seedRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/uploads', uploadRoutes); // ✅ Add upload routes
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({

@@ -59,13 +59,26 @@ export const productAPI = {
   delete: (id) => apiRequest(`/products/${id}`, { method: 'DELETE' }),
 };
 
-// ✅ Cart API
+// ✅ Cart API - Complete with user-specific functions
 export const cartAPI = {
+  // Original methods (for backward compatibility)
   get: () => apiRequest('/cart'),
   add: (productId, quantity) => apiRequest('/cart/add', { method: 'POST', body: JSON.stringify({ productId, quantity }) }),
   update: (itemId, quantity) => apiRequest(`/cart/update/${itemId}`, { method: 'PUT', body: JSON.stringify({ quantity }) }),
   remove: (itemId) => apiRequest(`/cart/remove/${itemId}`, { method: 'DELETE' }),
   clear: () => apiRequest('/cart/clear', { method: 'DELETE' }),
+  
+  // User-specific cart methods (for authenticated users)
+  getCart: (userId) => apiRequest(`/cart/user/${userId}`),
+  updateCart: (userId, cartData) => apiRequest(`/cart/user/${userId}`, { 
+    method: 'PUT', 
+    body: JSON.stringify(cartData) 
+  }),
+  clearCart: (userId) => apiRequest(`/cart/user/${userId}`, { method: 'DELETE' }),
+  mergeCart: (userId, guestCartItems) => apiRequest(`/cart/user/${userId}/merge`, { 
+    method: 'POST', 
+    body: JSON.stringify({ guestItems: guestCartItems }) 
+  }),
 };
 
 // ✅ Order API
@@ -83,12 +96,12 @@ export const adminAPI = {
   updateUserRole: (userId, role) => apiRequest(`/admin/users/${userId}/role`, { method: 'PUT', body: JSON.stringify({ role }) }),
 };
 
-// ✅ Payment API (Razorpay)
+// ✅ Payment API (Razorpay & COD)
 export const paymentAPI = {
   createOrder: (items) => apiRequest('/payments/create-order', { method: 'POST', body: JSON.stringify({ items }) }),
   verify: (payload) => apiRequest('/payments/verify', { method: 'POST', body: JSON.stringify(payload) }),
+  createCOD: (payload) => apiRequest('/payments/cod', { method: 'POST', body: JSON.stringify(payload) }),
 };
-
 
 // ✅ Default export for backward compatibility
 export default { authAPI, productAPI, cartAPI, orderAPI, adminAPI, paymentAPI };

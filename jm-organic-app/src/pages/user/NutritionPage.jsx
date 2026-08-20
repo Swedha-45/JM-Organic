@@ -1,6 +1,5 @@
 // pages/user/NutritionPage.jsx
 import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useCart } from '../../contexts/CartContext';
 import { productAPI } from '../../services/api';
 import { Link } from 'react-router-dom';
@@ -23,11 +22,8 @@ import {
 } from 'lucide-react';
 
 const NutritionPage = () => {
-  const { t, i18n } = useTranslation();
   const { addToCart, cartItems } = useCart();
-  const isTamil = i18n.language === 'ta';
 
-  // ✅ All hooks must be INSIDE the component
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
@@ -73,7 +69,7 @@ const NutritionPage = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-700 mx-auto"></div>
-          <p className="mt-4 text-gray-600 font-semibold">{t('loading') || 'Loading Lab & Nutrition Data...'}</p>
+          <p className="mt-4 text-gray-600 font-semibold">Loading Lab & Nutrition Data...</p>
         </div>
       </div>
     );
@@ -114,19 +110,26 @@ const NutritionPage = () => {
     );
   }
 
-  const displayName = isTamil
-    ? (selectedData.tamilName || selectedData.name)
-    : selectedData.name;
-  const displayDescription = isTamil
-    ? (selectedData.tamilDescription || selectedData.description)
-    : selectedData.description;
+  // ✅ Get data from database with fallbacks
+  const displayName = selectedData.name;
+  const displayDescription = selectedData.description;
   const displayBadge = selectedData.badge || '100% PURE';
   const isInCart = cartProductIds.includes(selectedData._id || selectedData.id);
 
-  const batchNumber = `JM-LAB-2026-${selectedData._id || selectedData.id}`;
-  const nutritionText = isTamil
-    ? (selectedData.nutritionTa || '100% தூய்மையான இயற்கை சத்துக்கள் அடங்கியது.')
-    : (selectedData.nutrition || 'Rich in natural essential fatty acids, zero solvents, and zero chemical preservatives.');
+  // ✅ Nutrition data from database
+  const nutritionData = {
+    peroxideValue: selectedData.peroxideValue || '0.42 mEq/kg (FSSAI Max: 1.0)',
+    ffa: selectedData.ffa || '0.12% (FSSAI Max: 0.25%)',
+    heavyMetals: selectedData.heavyMetals || 'NOT DETECTED (<0.01 ppm)',
+    solvents: selectedData.solvents || '0.0% (Zero Chemical Residue)',
+    extractionMethod: selectedData.extractionMethod || 'Traditional Wood-Pressed',
+    nutritionText: selectedData.nutrition || 'Rich in natural essential fatty acids, zero solvents, and zero chemical preservatives.',
+    immunityScore: selectedData.immunityScore || 98,
+    metabolismScore: selectedData.metabolismScore || 95,
+    heartScore: selectedData.heartScore || 96,
+    smokePoint: selectedData.smokePoint || '177°C - 229°C',
+    batchNumber: selectedData.batchNumber || `JM-LAB-2026-${(selectedData._id || selectedData.id || '').slice(-6)}`
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -175,7 +178,7 @@ const NutritionPage = () => {
                   const prodId = prod._id || prod.id;
                   const isActive = selectedProductId === prodId;
                   const inCart = cartProductIds.includes(prodId);
-                  const prodName = isTamil ? (prod.tamilName || prod.name) : prod.name;
+                  const prodName = prod.name;
 
                   return (
                     <button
@@ -322,19 +325,19 @@ const NutritionPage = () => {
             {/* Nutrition Details Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
-              {/* Fatty Acid / Product Composition */}
+              {/* Product Profile */}
               <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
                 <h3 className="text-base font-bold text-gray-800 flex items-center gap-2 mb-4">
                   <TrendingUp className="w-4 h-4 text-emerald-600" />
                   Product Profile
                 </h3>
                 <p className="text-xs text-gray-600 leading-relaxed bg-emerald-50/60 p-4 rounded-xl border border-emerald-100">
-                  {nutritionText}
+                  {nutritionData.nutritionText}
                 </p>
                 <div className="mt-4 space-y-2 text-xs text-gray-600">
                   <div className="flex justify-between py-1.5 border-b border-gray-50">
                     <span className="font-medium text-gray-700">Extraction Method</span>
-                    <span className="font-bold text-emerald-900">Traditional Wood-Pressed</span>
+                    <span className="font-bold text-emerald-900">{nutritionData.extractionMethod}</span>
                   </div>
                   <div className="flex justify-between py-1.5 border-b border-gray-50">
                     <span className="font-medium text-gray-700">Preservatives & Solvents</span>
@@ -355,25 +358,25 @@ const NutritionPage = () => {
                     Lab Purity Report
                   </h3>
                   <span className="text-[10px] font-mono bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                    #{batchNumber}
+                    #{nutritionData.batchNumber}
                   </span>
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between py-2 border-b border-gray-50">
                     <span className="text-gray-500">Peroxide Value</span>
-                    <span className="font-medium text-gray-800">0.42 mEq/kg (FSSAI Max: 1.0)</span>
+                    <span className="font-medium text-gray-800">{nutritionData.peroxideValue}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b border-gray-50">
                     <span className="text-gray-500">Free Fatty Acid</span>
-                    <span className="font-medium text-gray-800">0.12% (FSSAI Max: 0.25%)</span>
+                    <span className="font-medium text-gray-800">{nutritionData.ffa}</span>
                   </div>
                   <div className="flex justify-between py-2 border-b border-gray-50">
                     <span className="text-gray-500">Heavy Metals</span>
-                    <span className="font-medium text-green-700">NOT DETECTED (&lt;0.01 ppm)</span>
+                    <span className="font-medium text-green-700">{nutritionData.heavyMetals}</span>
                   </div>
                   <div className="flex justify-between py-2">
                     <span className="text-gray-500">Solvent Residue</span>
-                    <span className="font-medium text-green-700">0.0% (Zero Chemical Residue)</span>
+                    <span className="font-medium text-green-700">{nutritionData.solvents}</span>
                   </div>
                 </div>
               </div>
@@ -384,22 +387,22 @@ const NutritionPage = () => {
             <div className="grid grid-cols-4 gap-4">
               <div className="bg-white rounded-2xl shadow-sm p-4 text-center border border-gray-100">
                 <ShieldCheck className="w-5 h-5 text-emerald-600 mx-auto" />
-                <div className="text-xl font-bold text-gray-900 mt-1">98</div>
+                <div className="text-xl font-bold text-gray-900 mt-1">{nutritionData.immunityScore}</div>
                 <div className="text-[10px] text-gray-500 uppercase font-medium">Immunity Index</div>
               </div>
               <div className="bg-white rounded-2xl shadow-sm p-4 text-center border border-gray-100">
                 <Zap className="w-5 h-5 text-amber-500 mx-auto" />
-                <div className="text-xl font-bold text-gray-900 mt-1">95</div>
+                <div className="text-xl font-bold text-gray-900 mt-1">{nutritionData.metabolismScore}</div>
                 <div className="text-[10px] text-gray-500 uppercase font-medium">Metabolism Score</div>
               </div>
               <div className="bg-white rounded-2xl shadow-sm p-4 text-center border border-gray-100">
                 <Heart className="w-5 h-5 text-red-500 mx-auto" />
-                <div className="text-xl font-bold text-gray-900 mt-1">96</div>
+                <div className="text-xl font-bold text-gray-900 mt-1">{nutritionData.heartScore}</div>
                 <div className="text-[10px] text-gray-500 uppercase font-medium">Cardiovascular</div>
               </div>
               <div className="bg-white rounded-2xl shadow-sm p-4 text-center border border-gray-100">
                 <Flame className="w-5 h-5 text-orange-500 mx-auto" />
-                <div className="text-xs font-bold text-gray-900 mt-1">177°C - 229°C</div>
+                <div className="text-xs font-bold text-gray-900 mt-1">{nutritionData.smokePoint}</div>
                 <div className="text-[10px] text-gray-500 uppercase font-medium">Smoke Point</div>
               </div>
             </div>
@@ -432,7 +435,7 @@ const NutritionPage = () => {
                 </div>
                 <div className="flex justify-between py-1 border-b border-gray-50">
                   <span className="text-gray-500">Batch Code</span>
-                  <span className="font-mono">{batchNumber}</span>
+                  <span className="font-mono">{nutritionData.batchNumber}</span>
                 </div>
                 <div className="flex justify-between py-1 border-b border-gray-50">
                   <span className="text-gray-500">Chemical Solvents Test</span>
@@ -462,5 +465,4 @@ const NutritionPage = () => {
   );
 };
 
-// ✅ MUST HAVE THIS EXPORT!
 export default NutritionPage;

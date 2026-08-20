@@ -104,6 +104,7 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
+    localStorage.removeItem('cart');
   }, []);
 
   // ✅ Check for existing session

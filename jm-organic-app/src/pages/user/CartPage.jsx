@@ -1,5 +1,5 @@
 // pages/user/CartPage.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -10,13 +10,42 @@ import {
   Minus, 
   ArrowRight,
   ShoppingCart,
-  X
+  X,
+  Star
 } from 'lucide-react';
 
 const CartPage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const { cartItems, cartTotal, removeFromCart, updateQuantity, clearCart } = useCart();
+
+  // ✅ Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      navigate('/login', { 
+        state: { 
+          from: '/cart',
+          message: 'Please login to view your cart' 
+        } 
+      });
+    }
+  }, [isAuthenticated, loading, navigate]);
+
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-16 text-center">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ If not authenticated, don't render cart (will redirect)
+  if (!isAuthenticated) {
+    return null;
+  }
 
   // ✅ Calculate item count
   const itemCount = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
@@ -74,79 +103,96 @@ const CartPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Items List */}
         <div className="lg:col-span-2 space-y-4">
-          {cartItems.map((item) => (
-            <div 
-              key={item.id || item._id} 
-              className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4 hover:shadow-md transition"
-            >
-              {/* Product Image */}
-              <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                <img
-                  src={item.image || 'https://via.placeholder.com/100x100/15803d/ffffff?text=Organic'}
-                  alt={item.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/100x100/15803d/ffffff?text=Organic';
-                  }}
-                />
-              </div>
+          {cartItems.map((item) => {
+            const itemId = item.id || item._id;
+            const itemTotal = (item.price || 0) * (item.quantity || 1);
 
-              {/* Product Info */}
-              <div className="flex-1 min-w-0">
-                <Link 
-                  to={`/product/${item.id || item._id}`}
-                  className="font-semibold text-gray-800 hover:text-green-600 transition"
-                >
-                  {item.name}
-                </Link>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-sm text-gray-500">₹{item.price}</span>
-                  {item.originalPrice && (
-                    <span className="text-xs text-gray-400 line-through">₹{item.originalPrice}</span>
-                  )}
+            return (
+              <div 
+                key={itemId} 
+                className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4 hover:shadow-md transition border border-gray-100"
+              >
+                {/* Product Image */}
+                <div className="w-24 h-24 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                  <img
+                    src={item.image || 'https://via.placeholder.com/100x100/15803d/ffffff?text=Organic'}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = 'https://via.placeholder.com/100x100/15803d/ffffff?text=Organic';
+                    }}
+                  />
                 </div>
-                <div className="flex items-center gap-3 mt-2">
-                  {/* Quantity Controls */}
-                  <div className="flex items-center border border-gray-200 rounded-lg">
-                    <button
-                      onClick={() => handleQuantityChange(item.id || item._id, item.quantity, -1)}
-                      className="px-3 py-1.5 hover:bg-gray-100 rounded-l-lg transition"
-                    >
-                      <Minus className="w-3 h-3 text-gray-600" />
-                    </button>
-                    <span className="w-8 text-center text-sm font-medium text-gray-800">
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() => handleQuantityChange(item.id || item._id, item.quantity, 1)}
-                      className="px-3 py-1.5 hover:bg-gray-100 rounded-r-lg transition"
-                    >
-                      <Plus className="w-3 h-3 text-gray-600" />
-                    </button>
+
+                {/* Product Info */}
+                <div className="flex-1 min-w-0">
+                  <Link 
+                    to={`/product/${itemId}`}
+                    className="font-semibold text-gray-800 hover:text-green-600 transition text-base"
+                  >
+                    {item.name}
+                  </Link>
+                  
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-sm font-bold text-gray-900">₹{item.price || 0}</span>
+                    <span className="text-xs text-gray-500">/ {item.unit || 'L'}</span>
+                    {item.originalPrice && (
+                      <span className="text-xs text-gray-400 line-through">₹{item.originalPrice}</span>
+                    )}
                   </div>
 
-                  {/* Remove Button */}
-                  <button
-                    onClick={() => removeFromCart(item.id || item._id)}
-                    className="text-gray-400 hover:text-red-600 transition"
-                    aria-label="Remove item"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                  {/* Rating */}
+                  <div className="flex items-center gap-1 mt-1">
+                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                    <span className="text-xs font-semibold text-gray-700">{item.rating || 4.8}</span>
+                    <span className="text-xs text-gray-400">({item.reviews || item.reviewCount || 10})</span>
+                  </div>
+
+                  <div className="flex items-center gap-3 mt-2">
+                    {/* Quantity Controls */}
+                    <div className="flex items-center border border-gray-200 rounded-lg">
+                      <button
+                        onClick={() => handleQuantityChange(itemId, item.quantity, -1)}
+                        className="px-3 py-1.5 hover:bg-gray-100 rounded-l-lg transition"
+                        aria-label="Decrease quantity"
+                      >
+                        <Minus className="w-3 h-3 text-gray-600" />
+                      </button>
+                      <span className="w-8 text-center text-sm font-medium text-gray-800">
+                        {item.quantity || 1}
+                      </span>
+                      <button
+                        onClick={() => handleQuantityChange(itemId, item.quantity, 1)}
+                        className="px-3 py-1.5 hover:bg-gray-100 rounded-r-lg transition"
+                        aria-label="Increase quantity"
+                      >
+                        <Plus className="w-3 h-3 text-gray-600" />
+                      </button>
+                    </div>
+
+                    {/* Remove Button */}
+                    <button
+                      onClick={() => removeFromCart(itemId)}
+                      className="text-gray-400 hover:text-red-600 transition p-1"
+                      aria-label="Remove item"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Item Total */}
+                <div className="text-right flex-shrink-0">
+                  <p className="font-bold text-green-600 text-lg">₹{itemTotal.toFixed(2)}</p>
                 </div>
               </div>
-
-              {/* Item Total */}
-              <div className="text-right flex-shrink-0">
-                <p className="font-bold text-green-600">₹{(item.price * item.quantity).toFixed(2)}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24">
+          <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24 border border-gray-100">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Order Summary</h3>
             
             <div className="space-y-3 mb-4">
@@ -172,19 +218,13 @@ const CartPage = () => {
             </div>
 
             <button
-              onClick={() => navigate(isAuthenticated ? '/checkout' : '/login')}
+              onClick={() => navigate('/checkout')}
               className="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 font-semibold"
             >
               <ShoppingCart className="w-4 h-4" />
-              {isAuthenticated ? 'Proceed to Checkout' : 'Login to Checkout'}
+              Proceed to Checkout
               <ArrowRight className="w-4 h-4" />
             </button>
-
-            {!isAuthenticated && (
-              <p className="text-xs text-gray-500 text-center mt-3">
-                Login to complete your purchase
-              </p>
-            )}
 
             <Link
               to="/products"

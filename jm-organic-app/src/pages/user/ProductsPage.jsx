@@ -1,9 +1,9 @@
 // src/pages/ProductsPage.jsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { getProducts } from '../../services/productService';
 import ProductCard from '../../components/ProductCard';
-import { Search, X } from 'lucide-react';
+import { Search, X, Loader2 } from 'lucide-react';
 
 const ProductsPage = () => {
   const navigate = useNavigate();
@@ -15,8 +15,11 @@ const ProductsPage = () => {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isSearching, setIsSearching] = useState(false);
+  
+  const debounceTimerRef = useRef(null);
 
-  // ✅ Load products & parse URL params
+  // ✅ Load products from API (only once on mount)
   useEffect(() => {
     const loadProducts = async () => {
       setLoading(true);
@@ -30,7 +33,6 @@ const ProductsPage = () => {
         setSearchQuery(search);
         setSelectedCategory(category);
         
-        // Fetch product catalog
         const list = await getProducts();
         setProducts(list);
       } catch (err) {
@@ -42,22 +44,12 @@ const ProductsPage = () => {
     };
     
     loadProducts();
-  }, [location.search]);
+  }, []); // ✅ Only runs once, not on search change
 
-  // ✅ Dynamically build categories list from products
-  const categories = useMemo(() => {
-    const defaultCats = ['Oils', 'Fresh Coconuts', 'Fruits', 'Grains', 'Sweeteners', 'Bulk Orders'];
-    const dbCats = products.map(p => p.category).filter(Boolean);
-    const uniqueCats = Array.from(new Set([...defaultCats, ...dbCats]));
-    
-    return [
-      { id: 'all', label: 'All Products' },
-      ...uniqueCats.map(c => ({ id: c, label: c }))
-    ];
-  }, [products]);
-
-  // ✅ Filter products locally by search query AND selected category
+  // ✅ Filter products locally
   useEffect(() => {
+    if (products.length === 0) return;
+    
     let result = [...products];
     
     if (selectedCategory && selectedCategory !== 'all') {
@@ -78,17 +70,29 @@ const ProductsPage = () => {
     setFilteredProducts(result);
   }, [products, selectedCategory, searchQuery]);
 
+  // ✅ Debounced search - updates URL after user stops typing
   const handleSearch = (e) => {
     const value = e.target.value || '';
     setSearchQuery(value);
-    const params = new URLSearchParams(location.search);
-    if (value.trim()) {
-      params.set('search', value.trim());
-    } else {
-      params.delete('search');
+    setIsSearching(true);
+    
+    // Clear previous timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
     }
-    const queryString = params.toString();
-    navigate(`/products${queryString ? `?${queryString}` : ''}`, { replace: true });
+    
+    // Set new timer - update URL after 500ms of no typing
+    debounceTimerRef.current = setTimeout(() => {
+      const params = new URLSearchParams(location.search);
+      if (value.trim()) {
+        params.set('search', value.trim());
+      } else {
+        params.delete('search');
+      }
+      const queryString = params.toString();
+      navigate(`/products${queryString ? `?${queryString}` : ''}`, { replace: true });
+      setIsSearching(false);
+    }, 500);
   };
 
   const handleCategoryClick = (categoryId) => {
@@ -100,14 +104,39 @@ const ProductsPage = () => {
       params.delete('category');
     }
     const queryString = params.toString();
-    navigate(`/products${queryString ? `?${queryString}` : ''}`);
+    navigate(`/products${queryString ? `?${queryString}` : ''}`, { replace: true });
   };
 
   const clearFilters = () => {
     setSelectedCategory('all');
     setSearchQuery('');
-    navigate('/products');
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    navigate('/products', { replace: true });
   };
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
+
+  // ✅ Dynamically build categories list from products
+  const categories = useMemo(() => {
+    const defaultCats = ['Oils', 'Fresh Coconuts', 'Fruits', 'Grains', 'Sweeteners', 'Bulk Orders'];
+    const dbCats = products.map(p => p.category).filter(Boolean);
+    const uniqueCats = Array.from(new Set([...defaultCats, ...dbCats]));
+    
+    return [
+      { id: 'all', label: 'All Products' },
+      ...uniqueCats.map(c => ({ id: c, label: c }))
+    ];
+  }, [products]);
 
   if (loading) {
     return (
@@ -172,13 +201,27 @@ const ProductsPage = () => {
           value={searchQuery}
           onChange={handleSearch}
           placeholder="Search for organic products..."
-          className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500"
+          className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
         />
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        {searchQuery && (
+        
+        {/* Loading spinner while searching */}
+        {isSearching && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <Loader2 className="w-4 h-4 text-green-600 animate-spin" />
+          </div>
+        )}
+        
+        {/* Clear search button */}
+        {searchQuery && !isSearching && (
           <button
-            onClick={clearFilters}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            onClick={() => {
+              setSearchQuery('');
+              const params = new URLSearchParams(location.search);
+              params.delete('search');
+              navigate(`/products${params.toString() ? `?${params.toString()}` : ''}`, { replace: true });
+            }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
           >
             <X className="w-4 h-4" />
           </button>

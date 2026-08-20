@@ -1,34 +1,35 @@
+// src/pages/admin/AdminProducts.jsx
 import React, { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, X, Upload, Image as ImageIcon, Sparkles } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Upload, Image as ImageIcon, Sparkles, Flame, Apple, Wheat, Droplet, Beef } from 'lucide-react';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import { getAllProductsAsync, addProduct, updateProduct, deleteProduct } from '../../services/productService';
 import { autoTranslateToTamil } from '../../utils/tamilTranslator';
-
-const PRESET_IMAGES = [
-  { name: 'Coconut Oil', url: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=800&auto=format&fit=crop&q=80' },
-  { name: 'Virgin Coconut Oil', url: 'https://images.unsplash.com/photo-1620756236360-4a70a1623936?w=800&q=80' },
-  { name: 'Tender Coconut', url: 'https://images.unsplash.com/photo-1580910051074-3eb694886505?w=800&q=80' },
-  { name: 'Groundnuts', url: 'https://images.unsplash.com/photo-1567892737950-30c4db37cd89?w=800&q=80' },
-  { name: 'Turmeric Powder', url: 'https://images.unsplash.com/photo-1615485500704-8e990f9900f7?w=800&q=80' },
-  { name: 'Brown Rice', url: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800&q=80' }
-];
+import { uploadImage } from '../../services/uploadService';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
-  // Form states (Clean English Inputs Only)
+  // Form states
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [nutrition, setNutrition] = useState('');
   const [category, setCategory] = useState('Oils');
   const [price, setPrice] = useState('');
   const [unit, setUnit] = useState('1 Litre');
   const [stock, setStock] = useState('');
-  const [badge, setBadge] = useState('PURE');
+  const [badge, setBadge] = useState('');
   const [image, setImage] = useState('');
-  const [uploadMode, setUploadMode] = useState('file'); // 'file' or 'url'
+  const [uploadMode, setUploadMode] = useState('url');
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+
+  // ✅ NEW: Nutrition states - separate fields
+  const [calories, setCalories] = useState('');
+  const [protein, setProtein] = useState('');
+  const [carbs, setCarbs] = useState('');
+  const [fat, setFat] = useState('');
+  const [fiber, setFiber] = useState('');
 
   const loadProducts = async () => {
     const list = await getAllProductsAsync();
@@ -39,7 +40,7 @@ const AdminProducts = () => {
     loadProducts();
   }, []);
 
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
 
@@ -48,74 +49,98 @@ const AdminProducts = () => {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (uploadEvent) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const maxDim = 600;
-        let width = img.width;
-        let height = img.height;
-        if (width > height) {
-          if (width > maxDim) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          }
-        } else {
-          if (height > maxDim) {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-        }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
-        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
-        setImage(compressedBase64);
-      };
-      img.src = uploadEvent.target.result;
-    };
-    reader.readAsDataURL(file);
+    setUploading(true);
+    setUploadError('');
+    try {
+      const url = await uploadImage(file);
+      setImage(url);
+    } catch (err) {
+      setUploadError(err.message || 'Upload failed. Please try again.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const openAddModal = () => {
     setEditingId(null);
     setName('');
-    setDescription('Traditionally cold-pressed from farm-fresh produce — 100% pure and chemical free.');
-    setNutrition('Energy: 884 kcal, Lauric Acid: 51.2%, Trans Fat: 0g');
+    setDescription('');
     setCategory('Oils');
-    setPrice('180');
+    setPrice('');
     setUnit('1 Litre');
-    setStock('30');
-    setBadge('NEW');
-    setImage('https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=800&auto=format&fit=crop&q=80');
-    setUploadMode('file');
+    setStock('0');
+    setBadge('');
+    setImage('');
+    // ✅ Reset nutrition fields
+    setCalories('');
+    setProtein('');
+    setCarbs('');
+    setFat('');
+    setFiber('');
+    setUploadMode('url');
     setShowModal(true);
   };
 
   const openEditModal = (p) => {
     setEditingId(p.id);
-    setName(p.name);
+    setName(p.name || '');
     setDescription(p.description || '');
-    setNutrition(p.nutrition || '');
     setCategory(p.category || 'Oils');
-    setPrice(String(p.price));
+    setPrice(String(p.price || ''));
     setUnit(p.unit || '1 Litre');
-    setStock(String(p.stock || 0));
-    setBadge(p.badge || 'PURE');
+    setStock(String(p.stock !== undefined && p.stock !== null ? p.stock : 0));
+    setBadge(p.badge || '');
     setImage(p.image || '');
-    setUploadMode('file');
+    // ✅ Load nutrition data
+    const nutrition = p.nutritionInfo || {};
+    setCalories(nutrition.calories || '');
+    setProtein(nutrition.protein || '');
+    setCarbs(nutrition.carbs || '');
+    setFat(nutrition.fat || '');
+    setFiber(nutrition.fiber || '');
+    setUploadMode('url');
     setShowModal(true);
   };
 
+  // ✅ FIXED: handleSave with proper validation
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!name || !price) return;
+
+    // Validate Name
+    if (!name || name.trim() === '') {
+      alert('Please enter a product name');
+      return;
+    }
+
+    // Validate Price
+    const priceValue = parseFloat(price);
+    if (!price || isNaN(priceValue) || priceValue <= 0) {
+      alert('Please enter a valid price (must be greater than 0)');
+      return;
+    }
+
+    // Validate Stock
+    let stockValue = parseInt(stock);
+    if (isNaN(stockValue) || stockValue < 0) {
+      stockValue = 0;
+    }
+
+    // ✅ Build nutritionInfo object
+    const nutritionInfo = {
+      calories: calories || '0',
+      protein: protein || '0',
+      carbs: carbs || '0',
+      fat: fat || '0',
+      fiber: fiber || '0'
+    };
+
+    // Build nutrition string for display
+    const nutritionString = `Calories: ${calories || 0} kcal, Protein: ${protein || 0}g, Carbs: ${carbs || 0}g, Fat: ${fat || 0}g, Fiber: ${fiber || 0}g`;
+
+    const finalImage = image || 'https://via.placeholder.com/300x300/15803d/ffffff?text=No+Image';
 
     const tamilName = autoTranslateToTamil(name);
     const tamilDescription = autoTranslateToTamil(description);
-    const nutritionTa = autoTranslateToTamil(nutrition);
 
     const payload = {
       name,
@@ -124,27 +149,31 @@ const AdminProducts = () => {
       description,
       tamilDescription,
       descriptionTa: tamilDescription,
-      nutrition,
-      nutritionTa,
+      nutrition: nutritionString,
+      nutritionInfo, // ✅ Store as object
       category,
-      price: Number(price),
-      unit,
-      stock: Number(stock),
-      badge,
-      image,
+      price: priceValue,
+      unit: unit || '1 Litre',
+      stock: stockValue,
+      badge: badge || null,
+      image: finalImage,
       tags: ['Cold Pressed', 'Organic'],
-      rating: 5.0,
-      reviewCount: 1
+      rating: 0,
+      reviewCount: 0
     };
 
-    if (editingId) {
-      await updateProduct(editingId, payload);
-    } else {
-      await addProduct(payload);
+    try {
+      if (editingId) {
+        await updateProduct(editingId, payload);
+      } else {
+        await addProduct(payload);
+      }
+      await loadProducts();
+      setShowModal(false);
+    } catch (error) {
+      console.error('Error saving product:', error);
+      alert(error.message || 'Failed to save product. Please check all fields.');
     }
-
-    await loadProducts();
-    setShowModal(false);
   };
 
   const handleDelete = async (id) => {
@@ -191,7 +220,14 @@ const AdminProducts = () => {
                   <tr key={p.id} className="hover:bg-gray-50/80 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <img src={p.image} alt={p.name} className="w-11 h-11 rounded-2xl object-cover bg-green-50 shrink-0 border border-gray-200" />
+                        <img 
+                          src={p.image || 'https://via.placeholder.com/300x300/15803d/ffffff?text=No+Image'} 
+                          alt={p.name} 
+                          className="w-11 h-11 rounded-2xl object-cover bg-green-50 shrink-0 border border-gray-200"
+                          onError={(e) => {
+                            e.target.src = 'https://via.placeholder.com/300x300/15803d/ffffff?text=No+Image';
+                          }}
+                        />
                         <div>
                           <div className="font-extrabold text-gray-900 text-xs">{p.name}</div>
                           <div className="text-[10px] text-gray-400 font-mono mt-0.5">{p.id}</div>
@@ -209,9 +245,13 @@ const AdminProducts = () => {
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="px-2.5 py-1 rounded-full bg-green-100 text-green-900 text-[10px] font-black uppercase">
-                        {p.badge || 'ACTIVE'}
-                      </span>
+                      {p.badge ? (
+                        <span className="px-2.5 py-1 rounded-full bg-green-100 text-green-900 text-[10px] font-black uppercase">
+                          {p.badge}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-[10px]">—</span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -239,7 +279,7 @@ const AdminProducts = () => {
         </div>
       </div>
 
-      {/* Spacious & Comfortable Add / Edit Product Modal */}
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
           <div className="bg-white rounded-3xl p-6 sm:p-10 max-w-3xl w-full shadow-2xl relative max-h-[92vh] flex flex-col my-auto border border-gray-100 animate-fade-in">
@@ -251,7 +291,7 @@ const AdminProducts = () => {
                   {editingId ? 'Edit Product Details' : 'Add New Organic Product'}
                 </h3>
                 <p className="text-xs text-gray-500 font-medium mt-0.5">
-                  Update inventory catalog parameters comfortable and spacious below.
+                  {editingId ? 'Update product information' : 'Enter product details below'}
                 </p>
               </div>
               <button
@@ -263,14 +303,14 @@ const AdminProducts = () => {
               </button>
             </div>
 
-            {/* Scrollable Form Body */}
+            {/* Form Body */}
             <form onSubmit={handleSave} className="space-y-6 pt-6 overflow-y-auto pr-1 flex-1 custom-scrollbar">
               
-              {/* Photo Upload & Preview Card */}
+              {/* Image Upload */}
               <div className="bg-gray-50/90 p-5 sm:p-6 rounded-3xl border border-gray-200/80 space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <label className="text-xs font-black text-gray-800 uppercase tracking-wider">
-                    Product Media / Photo *
+                    Product Image
                   </label>
                   <div className="flex bg-white p-1 rounded-xl border border-gray-200 shadow-sm text-xs font-bold w-fit">
                     <button
@@ -293,7 +333,14 @@ const AdminProducts = () => {
                 <div className="flex flex-col sm:flex-row items-center gap-5">
                   <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden bg-white shrink-0 border-2 border-gray-200 flex items-center justify-center shadow-sm relative">
                     {image ? (
-                      <img src={image} alt="Preview" className="w-full h-full object-cover" />
+                      <img 
+                        src={image} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = 'https://via.placeholder.com/300x300/15803d/ffffff?text=No+Image';
+                        }}
+                      />
                     ) : (
                       <div className="flex flex-col items-center text-xs text-gray-400 font-bold gap-1">
                         <ImageIcon size={24} />
@@ -309,51 +356,38 @@ const AdminProducts = () => {
 
                   <div className="flex-1 space-y-3 w-full">
                     {uploadMode === 'file' ? (
-                      <label className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-green-300 bg-white rounded-2xl cursor-pointer hover:bg-green-50/60 transition-all text-center">
-                        <Upload size={20} className="text-green-800 mb-1" />
-                        <span className="text-xs font-bold text-gray-900">Click to choose image file from device</span>
-                        <span className="text-[10px] text-gray-500">PNG, JPG, WEBP or GIF</span>
+                      <label className={`flex flex-col items-center justify-center p-4 border-2 border-dashed rounded-2xl cursor-pointer transition-all text-center ${uploading ? 'border-gray-300 bg-gray-50 cursor-wait' : 'border-green-300 bg-white hover:bg-green-50/60'}`}>
+                        <Upload size={20} className={`mb-1 ${uploading ? 'text-gray-400 animate-pulse' : 'text-green-800'}`} />
+                        <span className="text-xs font-bold text-gray-900">
+                          {uploading ? 'Uploading...' : 'Click to choose image file'}
+                        </span>
+                        <span className="text-[10px] text-gray-500">PNG, JPG, WEBP (Max 5MB)</span>
                         <input
                           type="file"
                           accept="image/*"
                           onChange={handleFileUpload}
+                          disabled={uploading}
                           className="hidden"
                         />
                       </label>
                     ) : (
                       <input
                         type="url"
-                        required
                         value={image}
                         onChange={(e) => setImage(e.target.value)}
-                        placeholder="https://images.unsplash.com/..."
-                        className="w-full bg-white px-4 py-3 rounded-2xl text-xs font-semibold text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-800 shadow-sm"
+                        placeholder="https://example.com/image.jpg"
+                        className="w-full bg-white px-4 py-3 rounded-2xl text-sm font-semibold text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-800 shadow-sm"
                       />
                     )}
 
-                    {/* Presets */}
-                    <div>
-                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">
-                        Presets:
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {PRESET_IMAGES.map((preset) => (
-                          <button
-                            key={preset.name}
-                            type="button"
-                            onClick={() => setImage(preset.url)}
-                            className="text-[11px] font-bold text-green-900 bg-white border border-green-200 hover:bg-green-100 px-2.5 py-1 rounded-lg transition-colors shadow-xs"
-                          >
-                            + {preset.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                    {uploadError && (
+                      <p className="text-[11px] font-semibold text-red-600">{uploadError}</p>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Title Field */}
+              {/* Title */}
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Product Title *</label>
                 <input
@@ -366,31 +400,132 @@ const AdminProducts = () => {
                 />
               </div>
 
-              {/* Description Field */}
+              {/* Description */}
               <div>
                 <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Description *</label>
                 <textarea
                   rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Traditionally cold-pressed from farm-fresh produce — 100% pure and chemical free."
+                  placeholder="Product description..."
                   className="w-full bg-white px-4 py-3 rounded-2xl text-sm font-semibold text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-800 shadow-sm leading-relaxed"
                 />
               </div>
 
-              {/* Nutrition Field */}
-              <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Nutrition Facts & Benefits</label>
-                <input
-                  type="text"
-                  value={nutrition}
-                  onChange={(e) => setNutrition(e.target.value)}
-                  placeholder="Energy: 884 kcal, Lauric Acid: 51.2%, Trans Fat: 0g"
-                  className="w-full bg-white px-4 py-3 rounded-2xl text-sm font-semibold text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-800 shadow-sm"
-                />
+              {/* ✅ NEW: Nutrition Section - User Friendly */}
+              <div className="bg-green-50/70 p-5 rounded-3xl border border-green-200/80">
+                <div className="flex items-center gap-2 mb-4">
+                  <Flame className="w-5 h-5 text-green-700" />
+                  <label className="text-xs font-black text-gray-800 uppercase tracking-wider">
+                    Nutrition Information (per 100g)
+                  </label>
+                  <span className="text-[10px] text-gray-500 ml-auto">Enter numbers only</span>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                  {/* Calories */}
+                  <div>
+                    <label className="flex items-center gap-1 text-[10px] font-bold text-gray-600 mb-1">
+                      <Flame className="w-3 h-3 text-orange-500" />
+                      Calories
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={calories}
+                      onChange={(e) => setCalories(e.target.value)}
+                      placeholder="884"
+                      className="w-full bg-white px-3 py-2 rounded-xl text-sm font-bold text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-800 shadow-sm"
+                    />
+                    <span className="text-[8px] text-gray-400">kcal</span>
+                  </div>
+
+                  {/* Protein */}
+                  <div>
+                    <label className="flex items-center gap-1 text-[10px] font-bold text-gray-600 mb-1">
+                      <Beef className="w-3 h-3 text-red-500" />
+                      Protein
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={protein}
+                      onChange={(e) => setProtein(e.target.value)}
+                      placeholder="0"
+                      className="w-full bg-white px-3 py-2 rounded-xl text-sm font-bold text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-800 shadow-sm"
+                    />
+                    <span className="text-[8px] text-gray-400">g</span>
+                  </div>
+
+                  {/* Carbs */}
+                  <div>
+                    <label className="flex items-center gap-1 text-[10px] font-bold text-gray-600 mb-1">
+                      <Wheat className="w-3 h-3 text-yellow-600" />
+                      Carbs
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={carbs}
+                      onChange={(e) => setCarbs(e.target.value)}
+                      placeholder="0"
+                      className="w-full bg-white px-3 py-2 rounded-xl text-sm font-bold text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-800 shadow-sm"
+                    />
+                    <span className="text-[8px] text-gray-400">g</span>
+                  </div>
+
+                  {/* Fat */}
+                  <div>
+                    <label className="flex items-center gap-1 text-[10px] font-bold text-gray-600 mb-1">
+                      <Droplet className="w-3 h-3 text-blue-500" />
+                      Fat
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={fat}
+                      onChange={(e) => setFat(e.target.value)}
+                      placeholder="0"
+                      className="w-full bg-white px-3 py-2 rounded-xl text-sm font-bold text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-800 shadow-sm"
+                    />
+                    <span className="text-[8px] text-gray-400">g</span>
+                  </div>
+
+                  {/* Fiber */}
+                  <div>
+                    <label className="flex items-center gap-1 text-[10px] font-bold text-gray-600 mb-1">
+                      <Apple className="w-3 h-3 text-green-500" />
+                      Fiber
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      value={fiber}
+                      onChange={(e) => setFiber(e.target.value)}
+                      placeholder="0"
+                      className="w-full bg-white px-3 py-2 rounded-xl text-sm font-bold text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-800 shadow-sm"
+                    />
+                    <span className="text-[8px] text-gray-400">g</span>
+                  </div>
+                </div>
+
+                {/* Nutrition Preview */}
+                {(calories || protein || carbs || fat || fiber) && (
+                  <div className="mt-3 p-2 bg-white/80 rounded-xl border border-green-200/60">
+                    <p className="text-[10px] font-semibold text-gray-600">
+                      <span className="text-green-700">Preview:</span>{' '}
+                      {calories && `${calories} kcal`} {protein && `• Protein: ${protein}g`} {carbs && `• Carbs: ${carbs}g`} {fat && `• Fat: ${fat}g`} {fiber && `• Fiber: ${fiber}g`}
+                    </p>
+                  </div>
+                )}
               </div>
 
-              {/* Grid 1: Category, Price, Stock */}
+              {/* Category, Price, Stock */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Category *</label>
@@ -413,6 +548,8 @@ const AdminProducts = () => {
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Price (₹) *</label>
                   <input
                     type="number"
+                    min="0"
+                    step="1"
                     required
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
@@ -422,18 +559,25 @@ const AdminProducts = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Stock Qty *</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Stock *</label>
                   <input
                     type="number"
+                    min="0"
+                    step="1"
                     value={stock}
-                    onChange={(e) => setStock(e.target.value)}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value);
+                      if (val >= 0 || e.target.value === '') {
+                        setStock(e.target.value);
+                      }
+                    }}
                     placeholder="30"
                     className="w-full bg-white px-4 py-3 rounded-2xl text-sm font-bold text-gray-900 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-800 shadow-sm"
                   />
                 </div>
               </div>
 
-              {/* Grid 2: Unit Size & Badge */}
+              {/* Unit & Badge */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Unit Size *</label>
@@ -447,7 +591,7 @@ const AdminProducts = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Badge Tag</label>
+                  <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Badge (Optional)</label>
                   <input
                     type="text"
                     value={badge}
@@ -458,7 +602,7 @@ const AdminProducts = () => {
                 </div>
               </div>
 
-              {/* Form Action Footer */}
+              {/* Actions */}
               <div className="pt-4 flex items-center justify-end gap-3 border-t border-gray-100 shrink-0">
                 <button
                   type="button"
@@ -469,10 +613,11 @@ const AdminProducts = () => {
                 </button>
                 <button
                   type="submit"
-                  className="bg-green-900 text-white px-8 py-3.5 rounded-2xl text-xs font-extrabold shadow-md hover:bg-green-950 transition-all flex items-center gap-2"
+                  disabled={uploading}
+                  className="bg-green-900 text-white px-8 py-3.5 rounded-2xl text-xs font-extrabold shadow-md hover:bg-green-950 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Sparkles size={16} className="text-amber-400" />
-                  <span>Save Product</span>
+                  <span>{uploading ? 'Uploading...' : 'Save Product'}</span>
                 </button>
               </div>
 

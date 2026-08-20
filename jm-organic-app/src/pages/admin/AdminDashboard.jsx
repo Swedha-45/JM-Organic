@@ -1,10 +1,11 @@
 // src/pages/admin/AdminDashboard.jsx
 import React, { useState, useEffect } from 'react';
-import { adminAPI, orderAPI } from '../../services/api';
+import { adminAPI, orderAPI } from '../../services/api';  // Keep only these
 import { 
   Users, ShoppingBag, Package, DollarSign, 
   AlertTriangle, RefreshCw,
-  Eye, X, Building2, Phone, Mail, MapPin
+  Eye, X, Building2, Phone, Mail, MapPin,
+  ChevronDown, ChevronUp, UserPlus
 } from 'lucide-react';
 
 const statusColors = {
@@ -30,7 +31,8 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('ALL');
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const [lowStockProducts, setLowStockProducts] = useState([]);
-  const [recentUsers, setRecentUsers] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [displayUserCount, setDisplayUserCount] = useState(5);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
@@ -41,6 +43,29 @@ const AdminDashboard = () => {
 
     try {
       const response = await adminAPI.getStats();
+
+      // Fetch ALL users - using adminAPI
+      let allUsersList = [];
+      try {
+        // Try to get users from adminAPI if available
+        if (adminAPI.getAllUsers) {
+          const usersRes = await adminAPI.getAllUsers();
+          if (usersRes && Array.isArray(usersRes)) {
+            allUsersList = usersRes;
+          } else if (usersRes && Array.isArray(usersRes.users)) {
+            allUsersList = usersRes.users;
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to fetch users from adminAPI:', e);
+      }
+      
+      // If no users fetched, fallback to recentUsers from stats
+      if (allUsersList.length === 0 && response.recentUsers) {
+        allUsersList = response.recentUsers;
+      }
+      
+      setAllUsers(allUsersList);
 
       let apiOrders = [];
       try {
@@ -141,12 +166,12 @@ const AdminDashboard = () => {
       if (response.success) {
         setStats({
           ...response.stats,
+          totalUsers: allUsersList.length,
           totalOrders: combinedOrders.length,
           totalRevenue: combinedOrders.reduce((sum, o) => sum + (o.total || 0), 0),
           pendingOrders: combinedOrders.filter(o => o.status === 'pending').length
         });
         setLowStockProducts(response.lowStockProducts || []);
-        setRecentUsers(response.recentUsers || []);
       }
     } catch (err) {
       console.error('Dashboard loading error:', err);
@@ -204,6 +229,18 @@ const AdminDashboard = () => {
 
   const totalBulkOrders = ordersList.filter(o => o.isBulk).length;
   const totalProductOrders = ordersList.filter(o => !o.isBulk).length;
+
+  // Get users to display
+  const displayedUsers = allUsers.slice(0, displayUserCount);
+  const hasMoreUsers = allUsers.length > displayUserCount;
+
+  const loadMoreUsers = () => {
+    setDisplayUserCount(prev => prev + 10);
+  };
+
+  const showLessUsers = () => {
+    setDisplayUserCount(5);
+  };
 
   if (loading) {
     return (
@@ -484,33 +521,90 @@ const AdminDashboard = () => {
           )}
         </div>
 
+        {/* Users Section with Show More/Less */}
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200/80">
-          <h3 className="text-base font-bold text-gray-900 mb-4">Recent Registered Customers</h3>
-          {recentUsers.length === 0 ? (
-            <p className="text-gray-400 text-xs">No recent customer registrations.</p>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+              <Users className="w-5 h-5 text-purple-600" />
+              <span>Registered Customers</span>
+              <span className="text-xs font-extrabold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full">
+                {allUsers.length}
+              </span>
+            </h3>
+            <div className="flex items-center gap-2">
+              {displayUserCount > 5 && (
+                <button
+                  onClick={showLessUsers}
+                  className="text-xs font-bold text-gray-500 hover:text-gray-700 transition-colors flex items-center gap-1"
+                >
+                  <ChevronUp className="w-4 h-4" />
+                  <span>Show Less</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {allUsers.length === 0 ? (
+            <p className="text-gray-400 text-xs bg-gray-50 p-4 rounded-2xl border border-gray-200 text-center">
+              No customer registrations yet.
+            </p>
           ) : (
-            <div className="space-y-3">
-              {recentUsers.map((u) => (
-                <div key={u._id} className="flex items-center justify-between p-3.5 bg-gray-50/80 rounded-2xl border border-gray-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-green-900 text-white rounded-xl flex items-center justify-center font-extrabold text-xs shadow-xs">
-                      {(u.name || 'C').charAt(0).toUpperCase()}
+            <>
+              <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+                {displayedUsers.map((u) => (
+                  <div key={u._id || u.id || Math.random()} className="flex items-center justify-between p-3 bg-gray-50/80 rounded-2xl border border-gray-100 hover:bg-gray-100 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 bg-purple-900 text-white rounded-xl flex items-center justify-center font-extrabold text-xs shadow-xs flex-shrink-0">
+                        {(u.name || u.displayName || 'C').charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-gray-900 text-xs truncate">
+                          {u.name || u.displayName || u.email || 'Unknown'}
+                        </p>
+                        <p className="text-[11px] text-gray-500 truncate">
+                          {u.email || 'No email'}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-gray-900 text-xs">{u.name}</p>
-                      <p className="text-[11px] text-gray-500">{u.email}</p>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                        u.role === 'admin' 
+                          ? 'bg-amber-100 text-amber-800 border border-amber-200' 
+                          : 'bg-green-100 text-green-800 border border-green-200'
+                      }`}>
+                        {u.role || 'User'}
+                      </span>
+                      <span className="text-[10px] text-gray-400 font-medium whitespace-nowrap">
+                        {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}
+                      </span>
                     </div>
                   </div>
-                  <span className="text-[10px] text-gray-400 font-medium">
-                    {new Date(u.createdAt || Date.now()).toLocaleDateString()}
-                  </span>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+
+              {/* Show More Button */}
+              {hasMoreUsers && (
+                <button
+                  onClick={loadMoreUsers}
+                  className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 bg-gray-50 hover:bg-gray-100 rounded-2xl border border-gray-200 transition-colors text-xs font-bold text-purple-700"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span>Show {Math.min(10, allUsers.length - displayUserCount)} More Users</span>
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+              )}
+
+              {displayUserCount > 5 && !hasMoreUsers && (
+                <p className="mt-3 text-center text-[10px] text-gray-400 font-medium">
+                  Showing all {allUsers.length} users
+                </p>
+              )}
+            </>
           )}
         </div>
       </div>
 
+      {/* Order Details Modal */}
       {selectedOrderDetails && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl relative my-auto border border-gray-100 animate-fade-in space-y-6">

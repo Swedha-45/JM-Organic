@@ -10,57 +10,59 @@ const orderSchema = new mongoose.Schema({
   items: [{
     product: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product'
+      ref: 'Product',
+      required: true
     },
     name: String,
-    quantity: {
-      type: Number,
-      required: true,
-      min: 1
-    },
-    price: {
-      type: Number,
-      required: true
-    }
+    price: Number,
+    quantity: Number,
+    image: String
   }],
   total: {
     type: Number,
     required: true
   },
+  shippingAddress: {
+    name: String,
+    phone: String,
+    street: String,
+    city: String,
+    state: String,
+    pincode: String
+  },
+  // ✅ Payment Method: cod or online
+  paymentMethod: {
+    type: String,
+    enum: ['cod', 'online', 'razorpay'],
+    default: 'cod'
+  },
+  // ✅ Payment Status: pending, paid, failed, refunded
+  paymentStatus: {
+    type: String,
+    enum: ['pending', 'paid', 'failed', 'refunded'],
+    default: 'pending'
+  },
+  // ✅ Order Status
   status: {
     type: String,
     enum: ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
     default: 'pending'
   },
-  shippingAddress: {
-    name: String,
-    street: String,
-    city: String,
-    state: String,
-    pincode: String,
-    phone: String
-  },
-  paymentMethod: {
-    type: String,
-    enum: ['card', 'upi', 'cod'],
-    required: true
-  },
-  paymentStatus: {
-    type: String,
-    enum: ['pending', 'paid', 'failed'],
-    default: 'pending'
+  // ✅ Razorpay details (only for online payments)
+  razorpayDetails: {
+    orderId: String,
+    paymentId: String,
+    signature: String,
+    errorMessage: String // ✅ Store failure reason
   },
   orderDate: {
     type: Date,
     default: Date.now
   },
-  deliveryDate: Date,
-  notes: String
-}, {
-  timestamps: true
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
-// ✅ Check if model exists before creating it
-const Order = mongoose.models.Order || mongoose.model('Order', orderSchema);
-
-module.exports = Order;
+module.exports = mongoose.model('Order', orderSchema);

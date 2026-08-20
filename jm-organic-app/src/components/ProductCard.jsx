@@ -1,3 +1,4 @@
+// components/ProductCard.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Star, Heart } from 'lucide-react';
@@ -22,7 +23,22 @@ export default function ProductCard({ product }) {
       e.preventDefault();
       e.stopPropagation();
     }
-    addToCart(product);
+    
+    // Create cart item with proper structure
+    const cartItem = {
+      id: productId,
+      _id: productId,
+      name: product.name,
+      price: product.price || 0,
+      image: product.image,
+      unit: product.unit || 'L',
+      quantity: 1,
+      stock: product.stock || 0,
+      tamilName: product.tamilName || product.nameTa || product.name,
+      // Include any other product fields needed
+    };
+    
+    addToCart(cartItem);
     setAdded(true);
     setTimeout(() => setAdded(false), 1500);
   };
@@ -61,6 +77,9 @@ export default function ProductCard({ product }) {
           loading="lazy"
           decoding="async"
           className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+          onError={(e) => {
+            e.target.src = 'https://via.placeholder.com/300x300/15803d/ffffff?text=Organic';
+          }}
         />
       </div>
 
@@ -109,7 +128,12 @@ export default function ProductCard({ product }) {
             }`}
           >
             <ShoppingBag className="w-3.5 h-3.5" />
-            {product.stock === 0 ? (t('outOfStock') || 'Out of Stock') : added ? (t('added') || 'Added') : (t('addToCart') || 'Add to Cart')}
+            {product.stock === 0 
+              ? (t('outOfStock') || 'Out of Stock') 
+              : added 
+                ? (t('added') || 'Added') 
+                : (t('addToCart') || 'Add to Cart')
+            }
           </button>
         </div>
       </div>

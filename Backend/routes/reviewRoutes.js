@@ -1,19 +1,12 @@
 // routes/reviewRoute.js
 const express = require('express');
-
-// ✅ Create a router instance
 const router = express.Router();
-
-// ✅ Import models
 const Review = require('../models/Review');
-const { protect } = require('../middleware/auth');
 
 // ✅ GET all reviews (public)
 router.get('/', async (req, res) => {
   try {
-    const reviews = await Review.find()
-      .populate('user', 'name email')
-      .sort({ createdAt: -1 });
+    const reviews = await Review.find().sort({ createdAt: -1 });
     res.json({ success: true, reviews });
   } catch (error) {
     console.error('Get reviews error:', error);
@@ -21,44 +14,49 @@ router.get('/', async (req, res) => {
   }
 });
 
-// ✅ GET user's reviews (protected)
-router.get('/my-reviews', protect, async (req, res) => {
+// ✅ POST submit a review (PUBLIC - no authentication required)
+router.post('/', async (req, res) => {
   try {
-    const reviews = await Review.find({ user: req.user._id })
-      .populate('productId', 'name image')
-      .sort({ createdAt: -1 });
-    res.json({ success: true, reviews });
-  } catch (error) {
-    console.error('Get my reviews error:', error);
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-
-// ✅ POST submit a review (protected)
-router.post('/', protect, async (req, res) => {
-  try {
-    const { productId, rating, title, comment } = req.body;
+    const { author, location, productName, rating, title, comment, verified, image } = req.body;
     
+    // Validate required fields
+    if (!author || !productName || !rating || !title || !comment) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide: author, productName, rating, title, comment'
+      });
+    }
+
     const review = new Review({
-      user: req.user._id,
-      productId,
-      rating,
-      title,
-      comment,
-      verified: true,
+      author: author.trim(),
+      location: location || '',
+      productName: productName.trim(),
+      rating: Number(rating),
+      title: title.trim(),
+      comment: comment.trim(),
+      verified: verified !== undefined ? verified : true,
+      image: image || null,
       likes: 0
     });
     
     await review.save();
-    res.status(201).json({ success: true, review });
+    
+    res.status(201).json({ 
+      success: true, 
+      review,
+      message: 'Review submitted successfully!'
+    });
   } catch (error) {
     console.error('Create review error:', error);
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: error.message 
+    });
   }
 });
 
-// ✅ POST like a review (protected)
-router.post('/:id/like', protect, async (req, res) => {
+// ✅ PUT like a review (public)
+router.put('/:id/like', async (req, res) => {
   try {
     const review = await Review.findById(req.params.id);
     if (!review) {
@@ -73,8 +71,8 @@ router.post('/:id/like', protect, async (req, res) => {
   }
 });
 
-// ✅ DELETE a review (protected)
-router.delete('/:id', protect, async (req, res) => {
+// ✅ DELETE a review (admin only - optional)
+router.delete('/:id', async (req, res) => {
   try {
     const review = await Review.findByIdAndDelete(req.params.id);
     if (!review) {
@@ -87,5 +85,4 @@ router.delete('/:id', protect, async (req, res) => {
   }
 });
 
-// ✅ IMPORTANT: Export the router
 module.exports = router;
