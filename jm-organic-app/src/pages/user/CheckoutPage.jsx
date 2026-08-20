@@ -1,4 +1,3 @@
-// pages/CheckoutPage.jsx
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
@@ -16,12 +15,16 @@ import { useCart } from '../../contexts/CartContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { reduceStock } from '../../services/productService';
 import { createOrder } from '../../services/orderService12';
+import { paymentAPI } from '../../services/api';
+import { loadRazorpayScript } from '../../utils/loadRazorpay';
 
 const CheckoutPage = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
   const { user } = useAuth();
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [placedOrderId, setPlacedOrderId] = useState('');
+  const [processingPayment, setProcessingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -31,6 +34,8 @@ const CheckoutPage = () => {
     pincode: '',
     paymentMethod: 'cod',
   });
+
+  const [errors, setErrors] = useState({});
 
   React.useEffect(() => {
     if (user) {
@@ -47,8 +52,55 @@ const CheckoutPage = () => {
     }
   }, [user]);
 
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Full Name is required.';
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email Address is required.';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address.';
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone Number is required.';
+    } else if (!/^(?:\+91[\s-]?)?[6-9]\d{9}$/.test(formData.phone.trim())) {
+      newErrors.phone = 'Please enter a valid 10-digit Indian phone number.';
+    }
+
+    if (!formData.pincode.trim()) {
+      newErrors.pincode = 'Pincode is required.';
+    } else if (!/^[1-9][0-9]{5}$/.test(formData.pincode.trim())) {
+      newErrors.pincode = 'Please enter a valid 6-digit Indian pincode.';
+    }
+
+    if (!formData.address.trim()) {
+      newErrors.address = 'Delivery Address is required.';
+    } else if (formData.address.trim().length < 10) {
+      newErrors.address = 'Please provide a more detailed address (min. 10 characters).';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setPaymentError('');
+
+    if (!validate()) {
+      return;
+    }
 
     const itemsToOrder = cartItems.length > 0 ? cartItems : (() => {
       try {
@@ -62,17 +114,12 @@ const CheckoutPage = () => {
       return;
     }
 
-    const orderId = `JM-${Date.now().toString().slice(-6)}`;
-
-    // Format items to match MongoDB orderSchema
     const formattedItems = itemsToOrder.map(item => ({
       product: item._id || item.id || item.product || undefined,
       name: item.name || 'Organic Product',
       quantity: Number(item.quantity) || 1,
       price: Number(item.price) || 0
     }));
-
-    const calculatedTotal = formattedItems.reduce((sum, i) => sum + (i.price * i.quantity), 0);
 
     const shippingAddress = {
       name: formData.name,
@@ -82,22 +129,92 @@ const CheckoutPage = () => {
       phone: formData.phone
     };
 
-    const orderPayload = {
-      id: orderId,
-      items: formattedItems,
-      total: cartTotal || calculatedTotal,
-      shippingAddress,
-      customer: formData,
-      paymentMethod: (formData.paymentMethod && ['card', 'upi', 'cod'].includes(formData.paymentMethod)) ? formData.paymentMethod : 'cod',
-      date: new Date().toISOString(),
-      status: 'pending',
-    };
+    if (formData.paymentMethod === 'cod') {
+      const orderId = `JM-${Date.now().toString().slice(-6)}`;
+      const orderPayload = {
+        id: orderId,
+        items: formattedItems,
+        total: cartTotal,
+        shippingAddress,
+        customer: formData,
+        paymentMethod: 'cod',
+        date: new Date().toISOString(),
+        status: 'pending',
+      };
+      const createdOrder = await createOrder(orderPayload);
+      setPlacedOrderId(createdOrder?.id || orderId);
+      clearCart();
+      setOrderPlaced(true);
+      return;
+    }
 
-    const createdOrder = await createOrder(orderPayload);
+    setProcessingPayment(true);
+    try {
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        throw new Error('Could not load Razorpay. Check your internet connection and try again.');
+      }
 
-    setPlacedOrderId(createdOrder?.id || orderId);
-    clearCart();
-    setOrderPlaced(true);
+      const orderRes = await paymentAPI.createOrder(formattedItems);
+      if (!orderRes.success) {
+        throw new Error(orderRes.message || 'Could not start payment.');
+      }
+
+      const razorpay = new window.Razorpay({
+        key: orderRes.key,
+        amount: orderRes.amount,
+        currency: orderRes.currency,
+        order_id: orderRes.razorpayOrderId,
+        name: 'JM Organic Foods',
+        description: 'Order Payment',
+        prefill: {
+          name: formData.name,
+          email: formData.email,
+          contact: formData.phone,
+        },
+        theme: { color: '#1A6B3A' },
+        handler: async (response) => {
+          try {
+            const verifyRes = await paymentAPI.verify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              items: formattedItems,
+              shippingAddress,
+            });
+            if (!verifyRes.success) {
+              throw new Error(verifyRes.message || 'Payment verification failed.');
+            }
+            setPlacedOrderId(verifyRes.order?._id || verifyRes.order?.id || '');
+            clearCart();
+            setOrderPlaced(true);
+          } catch (verifyErr) {
+            setPaymentError(
+              verifyErr.message ||
+              'Payment was received but order verification failed. Please contact support with your payment ID before retrying.'
+            );
+          } finally {
+            setProcessingPayment(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setProcessingPayment(false);
+            setPaymentError('Payment was cancelled.');
+          },
+        },
+      });
+
+      razorpay.on('payment.failed', (response) => {
+        setProcessingPayment(false);
+        setPaymentError(response.error?.description || 'Payment failed. Please try again.');
+      });
+
+      razorpay.open();
+    } catch (err) {
+      setProcessingPayment(false);
+      setPaymentError(err.message || 'Something went wrong starting payment.');
+    }
   };
 
   if (orderPlaced) {
@@ -159,7 +276,6 @@ const CheckoutPage = () => {
           <span>Back to Cart</span>
         </Link>
 
-        {/* Step Indicator Header */}
         <div className="flex items-center justify-between max-w-2xl mx-auto mb-10 text-xs font-bold">
           <div className="flex items-center gap-2 text-brand-primary">
             <span className="w-7 h-7 rounded-full bg-brand-primary text-white flex items-center justify-center text-xs font-black">1</span>
@@ -178,7 +294,6 @@ const CheckoutPage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Form (2 cols) */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-3xl shadow-card border border-brand-border/80 p-6 sm:p-10">
               <h1 className="text-2xl sm:text-3xl font-display font-extrabold text-brand-dark mb-2">
@@ -188,7 +303,7 @@ const CheckoutPage = () => {
                 Please provide your contact and delivery address to complete your order.
               </p>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} noValidate className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-xs font-bold text-brand-dark uppercase tracking-wider mb-2">
@@ -198,13 +313,15 @@ const CheckoutPage = () => {
                       <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type="text"
-                        required
                         value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        onChange={(e) => handleChange('name', e.target.value)}
                         placeholder="e.g. Anbu Selvan"
-                        className="w-full pl-11 pr-4 py-3 rounded-2xl border border-brand-border bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                        className={`w-full pl-11 pr-4 py-3 rounded-2xl border ${
+                          errors.name ? 'border-red-500 focus:ring-red-500' : 'border-brand-border focus:ring-brand-primary'
+                        } bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2`}
                       />
                     </div>
+                    {errors.name && <p className="text-[11px] text-red-500 font-semibold mt-1">{errors.name}</p>}
                   </div>
 
                   <div>
@@ -215,13 +332,15 @@ const CheckoutPage = () => {
                       <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type="email"
-                        required
                         value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        onChange={(e) => handleChange('email', e.target.value)}
                         placeholder="anbu@example.com"
-                        className="w-full pl-11 pr-4 py-3 rounded-2xl border border-brand-border bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                        className={`w-full pl-11 pr-4 py-3 rounded-2xl border ${
+                          errors.email ? 'border-red-500 focus:ring-red-500' : 'border-brand-border focus:ring-brand-primary'
+                        } bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2`}
                       />
                     </div>
+                    {errors.email && <p className="text-[11px] text-red-500 font-semibold mt-1">{errors.email}</p>}
                   </div>
                 </div>
 
@@ -234,13 +353,15 @@ const CheckoutPage = () => {
                       <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <input
                         type="tel"
-                        required
                         value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        onChange={(e) => handleChange('phone', e.target.value)}
                         placeholder="+91 98765 43210"
-                        className="w-full pl-11 pr-4 py-3 rounded-2xl border border-brand-border bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                        className={`w-full pl-11 pr-4 py-3 rounded-2xl border ${
+                          errors.phone ? 'border-red-500 focus:ring-red-500' : 'border-brand-border focus:ring-brand-primary'
+                        } bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2`}
                       />
                     </div>
+                    {errors.phone && <p className="text-[11px] text-red-500 font-semibold mt-1">{errors.phone}</p>}
                   </div>
 
                   <div>
@@ -249,13 +370,14 @@ const CheckoutPage = () => {
                     </label>
                     <input
                       type="text"
-                      required
-                      pattern="[0-9]{6}"
                       value={formData.pincode}
-                      onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
+                      onChange={(e) => handleChange('pincode', e.target.value)}
                       placeholder="6-digit Pincode"
-                      className="w-full px-4 py-3 rounded-2xl border border-brand-border bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                      className={`w-full px-4 py-3 rounded-2xl border ${
+                        errors.pincode ? 'border-red-500 focus:ring-red-500' : 'border-brand-border focus:ring-brand-primary'
+                      } bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2`}
                     />
+                    {errors.pincode && <p className="text-[11px] text-red-500 font-semibold mt-1">{errors.pincode}</p>}
                   </div>
                 </div>
 
@@ -266,17 +388,18 @@ const CheckoutPage = () => {
                   <div className="relative">
                     <MapPin className="absolute left-4 top-4.5 w-4 h-4 text-muted-foreground" />
                     <textarea
-                      required
                       rows="3"
                       value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      onChange={(e) => handleChange('address', e.target.value)}
                       placeholder="Door No., Street name, Area, City"
-                      className="w-full pl-11 pr-4 py-3 rounded-2xl border border-brand-border bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-primary"
+                      className={`w-full pl-11 pr-4 py-3 rounded-2xl border ${
+                        errors.address ? 'border-red-500 focus:ring-red-500' : 'border-brand-border focus:ring-brand-primary'
+                      } bg-brand-light text-xs font-bold text-brand-dark focus:outline-none focus:ring-2`}
                     />
                   </div>
+                  {errors.address && <p className="text-[11px] text-red-500 font-semibold mt-1">{errors.address}</p>}
                 </div>
 
-                {/* Payment Selection */}
                 <div className="pt-4 border-t border-brand-border/60">
                   <label className="block text-xs font-bold text-brand-dark uppercase tracking-wider mb-3">
                     Select Payment Method:
@@ -326,18 +449,28 @@ const CheckoutPage = () => {
                   </div>
                 </div>
 
+                {paymentError && (
+                  <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs font-bold rounded-2xl mt-4">
+                    {paymentError}
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  className="w-full py-4 bg-brand-primary text-white font-extrabold rounded-2xl shadow-green-lg hover:bg-brand-dark transition-all text-sm flex items-center justify-center gap-2 mt-8"
+                  disabled={processingPayment}
+                  className="w-full py-4 bg-brand-primary text-white font-extrabold rounded-2xl shadow-green-lg hover:bg-brand-dark transition-all text-sm flex items-center justify-center gap-2 mt-8 disabled:opacity-60"
                 >
                   <Lock className="w-4 h-4 text-amber-300" />
-                  <span>Place Order • ₹{cartTotal.toFixed(2)}</span>
+                  <span>
+                    {processingPayment
+                      ? 'Processing...'
+                      : `Place Order • ₹${cartTotal.toFixed(2)}`}
+                  </span>
                 </button>
               </form>
             </div>
           </div>
 
-          {/* Sidebar Summary */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-3xl shadow-card border border-brand-border/80 p-6 sm:p-8 sticky top-28 space-y-6">
               <h2 className="text-lg font-display font-extrabold text-brand-dark border-b border-brand-border/60 pb-3">

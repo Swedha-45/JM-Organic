@@ -2,8 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { orderAPI } from '../../services/api';
-import { Package, Radio } from 'lucide-react';
-import { io } from 'socket.io-client';
+import { Package } from 'lucide-react';
 
 const OrdersPage = () => {
   const { user } = useAuth();
@@ -25,33 +24,10 @@ const OrdersPage = () => {
   useEffect(() => {
     loadOrders();
 
-    // Real-time socket listener for order status changes
-    const socketUrl = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
-    const socket = io(socketUrl, {
-      transports: ['polling', 'websocket'],
-      reconnection: true,
-      autoConnect: true
-    });
-
-    socket.on('order_status_updated', (updatedOrder) => {
-      console.log('⚡ User received live order status update:', updatedOrder);
-      loadOrders();
-    });
-
-    socket.on('order_created', (newOrder) => {
-      console.log('⚡ User received live order creation:', newOrder);
-      loadOrders();
-    });
-
-    // 6-second fallback polling
-    const interval = setInterval(loadOrders, 6000);
+    // ✅ Only keep polling interval for updates
+    const interval = setInterval(loadOrders, 10000);
 
     return () => {
-      if (socket) {
-        socket.off('order_status_updated');
-        socket.off('order_created');
-        socket.disconnect();
-      }
       clearInterval(interval);
     };
   }, []);
@@ -73,20 +49,16 @@ const OrdersPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex items-center justify-center min-h-[60vh] animate-fade-in">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-800">My Orders</h1>
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200 shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-          Live Updates Active
-        </span>
       </div>
       
       {orders.length === 0 ? (

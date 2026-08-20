@@ -23,7 +23,11 @@ const connectDB = async () => {
 
   try {
     const conn = await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 5000
+      serverSelectionTimeoutMS: 5000,
+      maxPoolSize: 50,
+      minPoolSize: 10,
+      socketTimeoutMS: 30000,
+      compressors: 'zlib'
     });
     console.log('MongoDB connected');
     return conn;

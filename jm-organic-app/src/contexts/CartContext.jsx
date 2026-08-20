@@ -1,5 +1,5 @@
 // contexts/CartContext.jsx
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 
 const CartContext = createContext();
 
@@ -22,7 +22,7 @@ export const CartProvider = ({ children }) => {
   }, [cartItems]);
 
   // Add item to cart
-  const addToCart = (product, quantity = 1) => {
+  const addToCart = useCallback((product, quantity = 1) => {
     const prodId = product._id || product.id;
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => (item._id || item.id) === prodId);
@@ -39,17 +39,17 @@ export const CartProvider = ({ children }) => {
         return [...prevItems, { ...product, id: prodId, quantity }];
       }
     });
-  };
+  }, []);
 
   // Remove item from cart
-  const removeFromCart = (id) => {
+  const removeFromCart = useCallback((id) => {
     setCartItems(prevItems => prevItems.filter(item => (item._id || item.id) !== id));
-  };
+  }, []);
 
   // Update item quantity
-  const updateQuantity = (id, newQuantity) => {
+  const updateQuantity = useCallback((id, newQuantity) => {
     if (newQuantity <= 0) {
-      removeFromCart(id);
+      setCartItems(prevItems => prevItems.filter(item => (item._id || item.id) !== id));
       return;
     }
     
@@ -58,14 +58,14 @@ export const CartProvider = ({ children }) => {
         (item._id || item.id) === id ? { ...item, quantity: newQuantity } : item
       )
     );
-  };
+  }, []);
 
   // Clear cart
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCartItems([]);
-  };
+  }, []);
 
-  const value = {
+  const value = useMemo(() => ({
     cartItems,
     cartTotal,
     itemCount,
@@ -73,7 +73,7 @@ export const CartProvider = ({ children }) => {
     removeFromCart,
     updateQuantity,
     clearCart,
-  };
+  }), [cartItems, cartTotal, itemCount, addToCart, removeFromCart, updateQuantity, clearCart]);
 
   return (
     <CartContext.Provider value={value}>

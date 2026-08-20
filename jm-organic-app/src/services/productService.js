@@ -1,38 +1,46 @@
 // src/services/productService.js
 import { productAPI } from './api';
 
-// In-memory cache for products
-let cachedProducts = null;
-let lastCacheTime = 0;
+// In-memory cache for products & queries
+const queryCache = new Map();
+const singleProductCache = new Map();
 const CACHE_TTL_MS = 60000; // 60 seconds
 
 export const clearProductsCache = () => {
-  cachedProducts = null;
-  lastCacheTime = 0;
+  queryCache.clear();
+  singleProductCache.clear();
 };
 
 // ✅ Get all products
 export const getProducts = async (params = {}) => {
-  const isDefaultQuery = Object.keys(params).length === 0 || (!params.search && !params.category && !params.featured);
+  const cacheKey = JSON.stringify(params);
   const now = Date.now();
 
-  if (isDefaultQuery && cachedProducts && (now - lastCacheTime < CACHE_TTL_MS)) {
-    return cachedProducts;
+  if (queryCache.has(cacheKey)) {
+    const entry = queryCache.get(cacheKey);
+    if (now - entry.timestamp < CACHE_TTL_MS) {
+      return entry.data;
+    }
   }
 
   try {
     const response = await productAPI.getAll(params);
     const productsList = response.products || [];
     
-    if (isDefaultQuery) {
-      cachedProducts = productsList;
-      lastCacheTime = now;
-    }
+    queryCache.set(cacheKey, { timestamp: now, data: productsList });
+
+    // Pre-populate singleProductCache
+    productsList.forEach(p => {
+      const pid = p.id || p._id;
+      if (pid) {
+        singleProductCache.set(pid.toString(), { timestamp: now, data: p });
+      }
+    });
 
     return productsList;
   } catch (error) {
     console.error('Error fetching products:', error);
-    return cachedProducts || [];
+    return queryCache.has(cacheKey) ? queryCache.get(cacheKey).data : [];
   }
 };
 
@@ -48,23 +56,32 @@ export const getAllProducts = async (params = {}) => {
 
 // ✅ Get featured products
 export const getFeaturedProducts = async () => {
-  try {
-    const response = await productAPI.getAll({ featured: true });
-    return response.products || [];
-  } catch (error) {
-    console.error('Error fetching featured products:', error);
-    return [];
-  }
+  return getProducts({ featured: true });
 };
 
 // ✅ Get product by ID
 export const getProductById = async (id) => {
+  if (!id) return null;
+  const productIdStr = id.toString();
+  const now = Date.now();
+
+  if (singleProductCache.has(productIdStr)) {
+    const entry = singleProductCache.get(productIdStr);
+    if (now - entry.timestamp < CACHE_TTL_MS) {
+      return entry.data;
+    }
+  }
+
   try {
     const response = await productAPI.getById(id);
-    return response.product || null;
+    const product = response.product || null;
+    if (product) {
+      singleProductCache.set(productIdStr, { timestamp: now, data: product });
+    }
+    return product;
   } catch (error) {
     console.error('Error fetching product:', error);
-    return null;
+    return singleProductCache.has(productIdStr) ? singleProductCache.get(productIdStr).data : null;
   }
 };
 

@@ -9,7 +9,6 @@ import { useTranslation } from 'react-i18next';
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, logout, isAuthenticated } = useAuth();
-  // ✅ Use itemCount from CartContext (it's already provided!)
   const { itemCount } = useCart();
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -81,6 +80,17 @@ const Navbar = () => {
             >
               {t('nutrition', 'Nutrition')}
             </Link>
+            {/* ✅ ADDED: Reviews Link */}
+            <Link
+              to="/reviews"
+              className={`px-5 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
+                location.pathname === '/reviews'
+                  ? 'bg-green-900 text-white shadow-sm'
+                  : 'text-gray-700 hover:text-green-900 hover:bg-gray-100'
+              }`}
+            >
+              {t('reviews', 'Reviews')}
+            </Link>
             <Link
               to="/bulk-orders"
               className={`px-5 py-2 rounded-full text-xs font-bold transition-all duration-200 ${
@@ -108,23 +118,11 @@ const Navbar = () => {
 
           {/* Right Header Controls */}
           <div className="hidden md:flex items-center space-x-3">
-            <button 
-              type="button" 
-              onClick={toggleLanguage}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-gray-200 bg-white text-xs font-bold text-green-900 hover:bg-green-50 transition-colors shadow-sm"
-            >
-              <span className="text-[10px] text-gray-500 uppercase">
-                {i18n.language === 'ta' ? 'EN' : 'IN'}
-              </span>
-              <span>{i18n.language === 'ta' ? 'English' : 'தமிழ்'}</span>
-            </button>
-
             <Link
               to="/cart"
               className="relative p-2.5 rounded-full bg-white border border-gray-200 text-gray-700 hover:text-green-900 hover:bg-green-50 transition-all duration-200 shadow-sm"
             >
               <ShoppingBag className="w-5 h-5 text-green-900" />
-              {/* ✅ Use itemCount from CartContext */}
               {itemCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-amber-500 text-white text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
                   {itemCount}
@@ -207,6 +205,14 @@ const Navbar = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 {t('nutrition', 'Nutrition')}
+              </Link>
+              {/* ✅ ADDED: Reviews Link in Mobile */}
+              <Link
+                to="/reviews"
+                className="px-4 py-2.5 rounded-xl text-sm font-bold text-green-900 hover:bg-green-50"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {t('reviews', 'Reviews')}
               </Link>
               <Link
                 to="/bulk-orders"

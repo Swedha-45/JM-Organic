@@ -83,6 +83,12 @@ export const adminAPI = {
   updateUserRole: (userId, role) => apiRequest(`/admin/users/${userId}/role`, { method: 'PUT', body: JSON.stringify({ role }) }),
 };
 
+// ✅ Payment API (Razorpay)
+export const paymentAPI = {
+  createOrder: (items) => apiRequest('/payments/create-order', { method: 'POST', body: JSON.stringify({ items }) }),
+  verify: (payload) => apiRequest('/payments/verify', { method: 'POST', body: JSON.stringify(payload) }),
+};
+
 
 // ✅ Default export for backward compatibility
-export default { authAPI, productAPI, cartAPI, orderAPI, adminAPI };
+export default { authAPI, productAPI, cartAPI, orderAPI, adminAPI, paymentAPI };

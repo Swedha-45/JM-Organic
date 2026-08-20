@@ -1,5 +1,5 @@
 // src/contexts/AuthContext.jsx
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useMemo, useCallback } from 'react';
 import { authAPI } from '../services/api';
 
 const AuthContext = createContext();
@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const normalizeUser = (u) => {
+  const normalizeUser = useCallback((u) => {
     if (!u) return null;
     const id = u.id || u._id || u.uid;
     return {
@@ -17,10 +17,10 @@ export const AuthProvider = ({ children }) => {
       id,
       _id: id
     };
-  };
+  }, []);
 
   // ✅ Email/Password Register
-  const register = async (userData) => {
+  const register = useCallback(async (userData) => {
     setLoading(true);
     try {
       const response = await authAPI.register(userData);
@@ -37,10 +37,10 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [normalizeUser]);
 
   // ✅ Email/Password Login
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     setLoading(true);
     try {
       const response = await authAPI.login(email, password);
@@ -57,10 +57,10 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [normalizeUser]);
 
   // ✅ Firebase Google Login
-  const googleAuth = async (idToken) => {
+  const googleAuth = useCallback(async (idToken) => {
     setLoading(true);
     try {
       const response = await authAPI.googleLogin(idToken);
@@ -77,10 +77,10 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [normalizeUser]);
 
   // ✅ Update Profile in MongoDB & Local State
-  const updateProfile = async (profileData) => {
+  const updateProfile = useCallback(async (profileData) => {
     setLoading(true);
     try {
       const response = await authAPI.updateProfile(profileData);
@@ -96,15 +96,15 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [normalizeUser]);
 
   // ✅ Logout
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');
-  };
+  }, []);
 
   // ✅ Check for existing session
   useEffect(() => {
@@ -121,9 +121,9 @@ export const AuthProvider = ({ children }) => {
         logout();
       }
     }
-  }, []);
+  }, [normalizeUser, logout]);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     login,
     register,
@@ -134,7 +134,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated,
     isAdmin: user?.role === 'admin',
     isUser: user?.role === 'user'
-  };
+  }), [user, login, register, googleAuth, updateProfile, logout, loading, isAuthenticated]);
 
   return (
     <AuthContext.Provider value={value}>

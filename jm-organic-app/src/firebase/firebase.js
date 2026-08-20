@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 // Your web app's Firebase configuration
@@ -19,8 +19,10 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 // Initialize Firebase Auth with standard browser persistence
 const auth = getAuth(app);
 
-// Initialize Firestore & Storage
-const db = getFirestore(app);
+// Initialize Firestore without WebSockets (force HTTP long polling) & Storage
+const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true
+});
 const storage = getStorage(app);
 export const googleClientId = "632810157378-25flsko570pmuu86nrtces6k7k0j8sab.apps.googleusercontent.com";
 

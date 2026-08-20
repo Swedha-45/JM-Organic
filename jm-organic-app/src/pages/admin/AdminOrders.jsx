@@ -1,10 +1,10 @@
+// src/pages/admin/AdminOrders.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import AdminPageHeader from '../../components/admin/AdminPageHeader';
 import StatusBadge from '../../components/admin/StatusBadge';
 import { getAllOrdersAsync } from '../../services/orderService12';
 import { orderAPI } from '../../services/api';
-import { io } from 'socket.io-client';
-import { RefreshCw, Radio } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 
 const FILTERS = ['All', 'Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 const STATUS_OPTIONS = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
@@ -13,7 +13,6 @@ const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
   const [activeFilter, setActiveFilter] = useState('All');
   const [updatingId, setUpdatingId] = useState(null);
-  const [isLive, setIsLive] = useState(true);
 
   const fetchOrders = async () => {
     try {
@@ -27,41 +26,10 @@ const AdminOrders = () => {
   useEffect(() => {
     fetchOrders();
 
-    // Setup Socket.io connection for real-time order updates
-    const socketUrl = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
-    const socket = io(socketUrl, {
-      transports: ['polling', 'websocket'],
-      reconnection: true,
-      autoConnect: true
-    });
-
-    socket.on('connect', () => {
-      setIsLive(true);
-    });
-
-    socket.on('order_created', (newOrder) => {
-      console.log('⚡ Real-time new order received:', newOrder);
-      fetchOrders();
-    });
-
-    socket.on('order_status_updated', (updatedOrder) => {
-      console.log('⚡ Real-time order status updated:', updatedOrder);
-      fetchOrders();
-    });
-
-    socket.on('disconnect', () => {
-      setIsLive(false);
-    });
-
-    // Fallback polling interval every 6 seconds
-    const interval = setInterval(fetchOrders, 6000);
+    // ✅ Only keep polling interval for updates
+    const interval = setInterval(fetchOrders, 10000);
 
     return () => {
-      if (socket) {
-        socket.off('order_created');
-        socket.off('order_status_updated');
-        socket.disconnect();
-      }
       clearInterval(interval);
     };
   }, []);
@@ -73,7 +41,6 @@ const AdminOrders = () => {
     try {
       setUpdatingId(rawId);
       
-      // Optimistically update local state
       setOrders((prev) =>
         prev.map((o) => {
           if (o.id === rawId || o._id === rawId) {
@@ -83,7 +50,6 @@ const AdminOrders = () => {
         })
       );
 
-      // Only invoke API if rawId is a valid 24-character Mongo ObjectId
       if (isValidMongoId(rawId)) {
         await orderAPI.updateStatus(rawId, newStatus);
       }
@@ -138,21 +104,9 @@ const AdminOrders = () => {
       <AdminPageHeader title="Orders" />
 
       <div className="p-8 space-y-5">
-        {/* Header Controls */}
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-semibold text-gray-800">Order Management</h2>
-            {isLive ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800 border border-green-300 shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                Real-Time Live
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
-                <Radio className="w-3 h-3 text-gray-400" />
-                Polling Sync
-              </span>
-            )}
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
@@ -179,7 +133,6 @@ const AdminOrders = () => {
           </div>
         </div>
 
-        {/* Orders Table */}
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">

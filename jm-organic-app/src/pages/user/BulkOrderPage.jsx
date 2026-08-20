@@ -194,13 +194,7 @@ const BulkOrderPage = () => {
       {/* Hero */}
       <section className="bg-gradient-to-r from-green-800 to-green-900 text-white py-20">
         <div className="max-w-5xl mx-auto px-4">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-white/80 hover:text-white text-sm mb-8"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </Link>
+          
 
           <span className="text-yellow-400 text-xs font-bold tracking-wide uppercase">
             For Restaurants, Hotels &amp; Retailers

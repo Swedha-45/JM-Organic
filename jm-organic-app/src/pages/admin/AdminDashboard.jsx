@@ -6,7 +6,6 @@ import {
   AlertTriangle, RefreshCw,
   Eye, X, Building2, Phone, Mail, MapPin
 } from 'lucide-react';
-import { io } from 'socket.io-client';
 
 const statusColors = {
   pending: 'bg-amber-100 text-amber-800 border-amber-200',
@@ -28,7 +27,7 @@ const AdminDashboard = () => {
   });
 
   const [ordersList, setOrdersList] = useState([]);
-  const [activeTab, setActiveTab] = useState('ALL'); // 'ALL', 'PRODUCT', 'BULK'
+  const [activeTab, setActiveTab] = useState('ALL');
   const [selectedOrderDetails, setSelectedOrderDetails] = useState(null);
   const [lowStockProducts, setLowStockProducts] = useState([]);
   const [recentUsers, setRecentUsers] = useState([]);
@@ -41,10 +40,8 @@ const AdminDashboard = () => {
     setError(null);
 
     try {
-      // 1. Fetch Backend Stats
       const response = await adminAPI.getStats();
 
-      // 2. Fetch All Backend Orders
       let apiOrders = [];
       try {
         const orderRes = await orderAPI.getAll();
@@ -55,7 +52,6 @@ const AdminDashboard = () => {
         if (response.recentOrders) apiOrders = response.recentOrders;
       }
 
-      // Format API Orders
       const formattedApiOrders = apiOrders.map((o) => {
         let custName = 'Customer';
         let custEmail = 'customer@jmorganic.in';
@@ -94,7 +90,6 @@ const AdminDashboard = () => {
         };
       });
 
-      // 3. Fetch Bulk Orders from localStorage
       let localBulkRequests = [];
       try {
         const rawBulk = localStorage.getItem('jm_bulk_requests');
@@ -130,7 +125,6 @@ const AdminDashboard = () => {
         console.warn('LocalStorage bulk read error:', err);
       }
 
-      // Deduplicate and Combine Orders
       const combinedMap = new Map();
       [...localBulkRequests, ...formattedApiOrders].forEach((item) => {
         if (!combinedMap.has(item.id)) {
@@ -165,28 +159,11 @@ const AdminDashboard = () => {
   useEffect(() => {
     loadDashboardData();
 
-    // Event listener for live bulk orders submitted locally
     const handleBulkEvent = () => loadDashboardData();
     window.addEventListener('bulkOrderSubmitted', handleBulkEvent);
 
-    // Socket.io real-time connection
-    const socketUrl = process.env.REACT_APP_SOCKET_URL || 'http://localhost:5000';
-    const socket = io(socketUrl, {
-      transports: ['polling', 'websocket'],
-      reconnection: true,
-      autoConnect: true
-    });
-
-    socket.on('order_created', () => loadDashboardData());
-    socket.on('order_status_updated', () => loadDashboardData());
-
     return () => {
       window.removeEventListener('bulkOrderSubmitted', handleBulkEvent);
-      if (socket) {
-        socket.off('order_created');
-        socket.off('order_status_updated');
-        socket.disconnect();
-      }
     };
   }, []);
 
@@ -196,12 +173,10 @@ const AdminDashboard = () => {
     try {
       setUpdatingId(orderItem.id);
       
-      // Optimistically update local state
       setOrdersList((prev) =>
         prev.map((o) => (o.id === orderItem.id ? { ...o, status: newStatus } : o))
       );
 
-      // Update localStorage bulk orders if applicable
       const rawBulk = localStorage.getItem('jm_bulk_requests');
       if (rawBulk) {
         const parsed = JSON.parse(rawBulk);
@@ -211,7 +186,6 @@ const AdminDashboard = () => {
         localStorage.setItem('jm_bulk_requests', JSON.stringify(updated));
       }
 
-      // Only invoke API if rawId is a valid 24-character Mongo ObjectId
       if (orderItem.rawId && isValidMongoId(orderItem.rawId)) {
         await orderAPI.updateStatus(orderItem.rawId, newStatus);
       }
@@ -290,7 +264,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="p-6 md:p-8 space-y-8 bg-gray-50/50 min-h-screen">
-      {/* Dashboard Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900 tracking-tight">Admin Operations Console</h1>
@@ -305,7 +278,6 @@ const AdminDashboard = () => {
         </button>
       </div>
 
-      {/* Primary Metric Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {metricCards.map((metric, index) => (
           <div key={index} className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200/80 hover:shadow-md transition-all duration-200">
@@ -323,10 +295,7 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      {/* DETAILED ORDERS & BULK ORDERS MANAGEMENT CONSOLE */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-gray-200/80 space-y-6">
-        
-        {/* Table Filter Tabs */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-gray-100">
           <div>
             <h2 className="text-lg font-black text-gray-900">Orders & Bulk Requests Feed</h2>
@@ -367,7 +336,6 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Detailed Orders Table */}
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 border-b border-gray-100">
@@ -382,8 +350,6 @@ const AdminDashboard = () => {
             <tbody className="divide-y divide-gray-100">
               {filteredOrders.map((order) => (
                 <tr key={order.id} className="hover:bg-gray-50/80 transition-colors">
-                  
-                  {/* ID & Order Type Badge */}
                   <td className="px-5 py-4">
                     <div className="font-mono text-xs font-bold text-green-900">{order.id}</div>
                     {order.isBulk ? (
@@ -399,7 +365,6 @@ const AdminDashboard = () => {
                     )}
                   </td>
 
-                  {/* Customer Info */}
                   <td className="px-5 py-4">
                     <div className="font-extrabold text-gray-900 text-xs">
                       {order.businessName ? `${order.businessName}` : order.customerName}
@@ -410,7 +375,6 @@ const AdminDashboard = () => {
                     </div>
                   </td>
 
-                  {/* Items Detail */}
                   <td className="px-5 py-4 max-w-xs">
                     {Array.isArray(order.items) && order.items.length > 0 ? (
                       <div className="space-y-1">
@@ -427,7 +391,6 @@ const AdminDashboard = () => {
                     )}
                   </td>
 
-                  {/* Total Amount / Volume */}
                   <td className="px-5 py-4">
                     <div className="font-black text-gray-900 text-xs">₹{order.total.toLocaleString()}</div>
                     {order.quantity && (
@@ -435,12 +398,10 @@ const AdminDashboard = () => {
                     )}
                   </td>
 
-                  {/* Date */}
                   <td className="px-5 py-4 text-xs text-gray-500 font-medium">
                     {new Date(order.orderDate).toLocaleDateString()}
                   </td>
 
-                  {/* Status Dropdown */}
                   <td className="px-5 py-4">
                     <select
                       value={order.status}
@@ -456,7 +417,6 @@ const AdminDashboard = () => {
                     </select>
                   </td>
 
-                  {/* View Details Action */}
                   <td className="px-5 py-4">
                     <button
                       onClick={() => setSelectedOrderDetails(order)}
@@ -466,7 +426,6 @@ const AdminDashboard = () => {
                       <span>Details</span>
                     </button>
                   </td>
-
                 </tr>
               ))}
 
@@ -482,10 +441,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Low Stock & Recent Users Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        {/* Low Stock Products Card */}
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200/80">
           <h3 className="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-amber-500" />
@@ -528,7 +484,6 @@ const AdminDashboard = () => {
           )}
         </div>
 
-        {/* Recent Registered Users */}
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-200/80">
           <h3 className="text-base font-bold text-gray-900 mb-4">Recent Registered Customers</h3>
           {recentUsers.length === 0 ? (
@@ -554,15 +509,11 @@ const AdminDashboard = () => {
             </div>
           )}
         </div>
-
       </div>
 
-      {/* FULL ORDER & BULK QUOTE DETAILS MODAL */}
       {selectedOrderDetails && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl relative my-auto border border-gray-100 animate-fade-in space-y-6">
-            
-            {/* Modal Header */}
             <div className="flex items-center justify-between pb-4 border-b border-gray-100">
               <div className="flex items-center gap-3">
                 <div className={`p-3 rounded-2xl text-white ${selectedOrderDetails.isBulk ? 'bg-amber-600' : 'bg-green-900'}`}>
@@ -589,7 +540,6 @@ const AdminDashboard = () => {
               </button>
             </div>
 
-            {/* Customer & Business Contact Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-50/80 p-5 rounded-2xl border border-gray-200/60">
               <div>
                 <span className="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">
@@ -624,7 +574,6 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            {/* Items Breakdown Table */}
             <div>
               <h4 className="text-xs font-black text-gray-800 uppercase tracking-wider mb-3">Order Items Breakdown</h4>
               <div className="bg-gray-50 rounded-2xl p-4 border border-gray-200/60 space-y-2">
@@ -648,7 +597,6 @@ const AdminDashboard = () => {
               </div>
             </div>
 
-            {/* Notes / Message */}
             {selectedOrderDetails.notes && (
               <div>
                 <span className="text-[10px] font-black text-gray-500 uppercase tracking-wider block mb-1">Customer / Quote Notes</span>
@@ -658,7 +606,6 @@ const AdminDashboard = () => {
               </div>
             )}
 
-            {/* Close Button */}
             <div className="flex justify-end pt-2 border-t border-gray-100">
               <button
                 onClick={() => setSelectedOrderDetails(null)}
@@ -667,11 +614,9 @@ const AdminDashboard = () => {
                 Close Details
               </button>
             </div>
-
           </div>
         </div>
       )}
-
     </div>
   );
 };

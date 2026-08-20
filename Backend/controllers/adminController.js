@@ -9,7 +9,7 @@ const getDashboardStats = async (req, res) => {
     const totalOrders = await Order.countDocuments();
     const totalProducts = await Product.countDocuments();
     
-    const orders = await Order.find();
+    const orders = await Order.find().select('total').lean();
     const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
     
     const pendingOrders = await Order.countDocuments({ status: 'pending' });
@@ -19,15 +19,18 @@ const getDashboardStats = async (req, res) => {
     const recentOrders = await Order.find()
       .sort({ orderDate: -1 })
       .limit(5)
-      .populate('user', 'name email');
+      .populate('user', 'name email')
+      .lean();
 
     const lowStockProducts = await Product.find({ stock: { $lt: 10 } })
-      .select('name stock price');
+      .select('name stock price')
+      .lean();
 
     const recentUsers = await User.find()
       .sort({ createdAt: -1 })
       .limit(5)
-      .select('name email createdAt');
+      .select('name email createdAt')
+      .lean();
 
     res.json({
       success: true,
@@ -56,7 +59,7 @@ const getDashboardStats = async (req, res) => {
 // @desc    Get all users (Admin)
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-password');
+    const users = await User.find().select('-password').lean();
     res.json({
       success: true,
       users

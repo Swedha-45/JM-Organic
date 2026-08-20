@@ -1,9 +1,8 @@
 const express = require('express');
-const mongoose = require('mongoose');
+const mongoose = require('mongoose'); // ✅ Add this!
 const cors = require('cors');
 const dotenv = require('dotenv');
-const http = require('http');
-const { Server } = require('socket.io');
+const compression = require('compression');
 
 dotenv.config();
 
@@ -14,26 +13,17 @@ const orderRoutes = require('./routes/orderRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const seedRoutes = require('./routes/seedRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 
 const app = express();
-const server = http.createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
-  }
-});
+// Disable powered-by header & enable strong ETags for instant 304 cache validation
+app.disable('x-powered-by');
+app.set('etag', 'strong');
 
-app.set('io', io);
-
-io.on('connection', (socket) => {
-  console.log('⚡ Socket client connected:', socket.id);
-  socket.on('disconnect', () => {
-    console.log('⚡ Socket client disconnected:', socket.id);
-  });
-});
+// Enable Gzip Compression for low payload sizes and faster data transfer latency
+app.use(compression());
 
 // Middleware
 app.use(cors({
@@ -42,6 +32,11 @@ app.use(cors({
 }));
 app.use((req, res, next) => {
   res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("Keep-Alive", "timeout=65");
+  if (req.method === 'GET' && req.path.startsWith('/api/products')) {
+    res.setHeader('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600');
+  }
   next();
 });
 app.use(express.json({ limit: '10mb' }));
@@ -62,7 +57,8 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/seed', seedRoutes);
-
+app.use('/api/payments', paymentRoutes);
+app.use('/api/reviews', reviewRoutes);
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({
@@ -84,7 +80,7 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 connectDB().then(async () => {
-  server.listen(PORT, () => {
+  app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
     console.log(`📊 API Base: http://localhost:${PORT}/api`);
     console.log(`🏥 Health: http://localhost:${PORT}/api/health`);
